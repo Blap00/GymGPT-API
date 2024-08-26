@@ -34,7 +34,7 @@ Estas instrucciones te permitirán obtener una copia del proyecto y ejecutarlo e
 
 Asegúrate de tener instaladas las siguientes herramientas:
 
-- [Python Django](https://www.djangoproject.com/) (versión 20 o superior)
+- [Python Django](https://www.djangoproject.com/) (versión 5.1 o superior)
 - [MySQL](https://www.mysql.com/products/workbench/) para la base de datos
 
 ### Instalación
@@ -100,15 +100,10 @@ Una vez completados los pasos anteriores, deberías poder acceder a la aplicaci�
 ## ⛏️ Build fue realizada gracias a <a name = "built_using"></a>
 
 
-- [VueJs](https://vuejs.org/) - Web Framework
-- [NodeJs](https://nodejs.org/en/) - Server Environment
+- [Python Django](https://www.djangoproject.com/)
 
 ## ✍️ Autores <a name = "authors"></a>
 
 - [@Blap00](https://github.com/Blap00) - Desarrollador del sistema
-
-
-## 🎉 Agradecimientos <a name = "acknowledgement"></a>
-
-- Gracias a videos en YT de [@Midudev](https://www.youtube.com/@midudev)
-- Proyecto inicial gracias a [Wisely](https://wisely.cl/)
+- [@MoonLight-coder](https://github.com/MoonLight-coder) - Colaborador del Sistema
+- [@AstrovC](https://github.com/AstrovC) - Colaborador del Sistema
