@@ -63,7 +63,7 @@ Sigue estos pasos para configurar el proyecto en tu entorno local:
     2. Instala las dependencias necesarias:
 
         ```bash
-        pip install -r requirements.txt
+        pip install -r requeriments.txt
         ```
 
     3. Configura la base de datos SQLITE:
@@ -82,7 +82,7 @@ Sigue estos pasos para configurar el proyecto en tu entorno local:
         ```bash
         python manage.py runserver
         ```
-
+python manage.py startapp huggingface
 ### Estructura del Proyecto
 
 El proyecto está dividido en dos partes principales:

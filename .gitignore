@@ -1,2 +1,3 @@
 /GymGPT/venv
 /GymGPT/venv/*
+/GymGPT/API/API/.env
