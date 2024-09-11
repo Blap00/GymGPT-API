@@ -1,13 +1,14 @@
 from django.shortcuts import render
-import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from dotenv import main # type: ignore
+import openai
+from dotenv import load_dotenv
 import os
 
-main.load_dotenv()
-keyApi = os.environ['HUGGINGFACE_API_KEY']
+# Cargar variables de entorno
+load_dotenv()
+keyApi = os.environ['OPENAI_API_KEY']  # Asegúrate de usar la clave correcta
 
 # Página de inicio
 def index(request):
@@ -23,26 +24,23 @@ def interpret_text(request):
             if not text_input:
                 return JsonResponse({'error': 'No text provided'}, status=400)
 
-            headers = {
-                'Authorization': f'Bearer ' + keyApi,
-                'Content-Type': 'application/json'
-            }
+            # Configurar la API Key de OpenAI
+            openai.api_key = keyApi
 
-            # Generación de texto con mrm8488/gpt2-spanish
-            payload = {
-                'inputs': text_input
-            }
+            # Llamada a la API de OpenAI usando la nueva sintaxis (>=1.0.0)
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",  # Modelo más avanzado compatible con chat
+                messages=[
+                    {"role": "system", "content": "Eres un asistente que responde en español."},
+                    {"role": "user", "content": text_input}
+                ],
+                max_tokens=100,
+                temperature=0.7
+            )
 
-            # Usar el modelo ajustado para español
-            response = requests.post('https://api-inference.huggingface.co/models/mrm8488/gpt2-spanish', headers=headers, json=payload)
-            response_data = response.json()
+            # Extraer la respuesta generada
+            generated_text = response['choices'][0]['message']['content'].strip()
 
-            if 'error' in response_data:
-                return JsonResponse({'error': response_data['error']}, status=response.status_code)
-
-            generated_text = response_data[0]['generated_text']
-
-            # Retornar texto generado en español
             return JsonResponse({'response': generated_text}, status=200)
 
         except json.JSONDecodeError:
