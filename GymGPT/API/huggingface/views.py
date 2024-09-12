@@ -5,8 +5,13 @@ import json
 import openai
 from dotenv import load_dotenv
 import os
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+
 # THERE WE WILL IMPORT MODELS & FORMS:
 from .models import * # Importing models from models.py
+from .serializers import RegisterSerializer
 
 # Cargar variables de entorno
 load_dotenv()
@@ -52,38 +57,11 @@ def interpret_text(request):
     else:
         return JsonResponse({'error': 'POST request required'}, status=400)
 
-@ensure_csrf_cookie
-def registerUsuario(request):
+@api_view(['POST'])
+def register_user(request):
     if request.method == 'POST':
-        try:
-            # Obtener datos del cuerpo de la solicitud
-            data = json.loads(request.body)
-            username = data.get('username', '')
-            password = data.get('password', '')
-            email = data.get('email', '')
-
-            # Validar datos
-            if not username or not password or not email:
-                return JsonResponse({'error': 'Faltan datos obligatorios.'}, status=400)
-
-            # Verificar si el usuario ya existe
-            if User.objects.filter(username=username).exists():
-                return JsonResponse({'error': 'El nombre de usuario ya existe.'}, status=400)
-
-            # Crear el nuevo usuario
-            user = User.objects.create(
-                username=username,
-                email=email,
-                password=make_password(password)  # Hash de la contraseña
-            )
-
-            # Confirmar el registro exitoso
-            return JsonResponse({'message': 'Usuario registrado exitosamente.'}, status=201)
-
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'JSON inválido.'}, status=400)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-
-    else:
-        return JsonResponse({'error': 'Se requiere una solicitud POST.'}, status=400)
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Usuario registrado con éxito"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
