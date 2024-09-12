@@ -85,6 +85,25 @@ DATABASES = {
     }
 }
 
+# SETUP DATABASE FROM ENVIRONMENT
+PORT=os.environ['PORT']
+HOST=os.environ['HOST']
+DB_NAME=os.environ['DB_NAME']
+DB_USER=os.environ['DB_USER']
+DB_PASSWORD=os.environ['DB_PASSWORD']
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': DB_NAME,                 # Replace with your desired database name
+        'USER': DB_USER,                     # Your username on MYSQL
+        'PASSWORD': DB_PASSWORD,                # Your password on MYSQL
+        'HOST': HOST,                # Host to setup the database
+        'PORT': PORT,                     # Specify your MySQL port
+        'AUTOCOMMIT': True,               # Enable auto-commit on BBDD
+    }
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -103,6 +122,9 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+AUTH_USER_MODEL = 'huggingface.customuser'
 
 
 # Internationalization

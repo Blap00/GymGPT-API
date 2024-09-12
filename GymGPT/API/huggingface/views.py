@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt #Testing
 import json
 import openai
 from dotenv import load_dotenv
 import os
+# THERE WE WILL IMPORT MODELS & FORMS:
+from .models import * # Importing models from models.py
 
 # Cargar variables de entorno
 load_dotenv()
@@ -49,3 +51,39 @@ def interpret_text(request):
             return JsonResponse({'error': str(e)}, status=500)
     else:
         return JsonResponse({'error': 'POST request required'}, status=400)
+
+@ensure_csrf_cookie
+def registerUsuario(request):
+    if request.method == 'POST':
+        try:
+            # Obtener datos del cuerpo de la solicitud
+            data = json.loads(request.body)
+            username = data.get('username', '')
+            password = data.get('password', '')
+            email = data.get('email', '')
+
+            # Validar datos
+            if not username or not password or not email:
+                return JsonResponse({'error': 'Faltan datos obligatorios.'}, status=400)
+
+            # Verificar si el usuario ya existe
+            if User.objects.filter(username=username).exists():
+                return JsonResponse({'error': 'El nombre de usuario ya existe.'}, status=400)
+
+            # Crear el nuevo usuario
+            user = User.objects.create(
+                username=username,
+                email=email,
+                password=make_password(password)  # Hash de la contraseña
+            )
+
+            # Confirmar el registro exitoso
+            return JsonResponse({'message': 'Usuario registrado exitosamente.'}, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'JSON inválido.'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    else:
+        return JsonResponse({'error': 'Se requiere una solicitud POST.'}, status=400)
