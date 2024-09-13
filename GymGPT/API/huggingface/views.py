@@ -1,27 +1,31 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt #Testing
+from django.views.decorators.csrf import csrf_exempt
 import json
-import openai
+import openai  # type: ignore
 from dotenv import load_dotenv
 import os
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework import status  # type: ignore
+from rest_framework.response import Response  # type: ignore
+from rest_framework.decorators import api_view  # type: ignore
 
-# THERE WE WILL IMPORT MODELS & FORMS:
-from .models import * # Importing models from models.py
+# Importar modelos y serializers
+from .models import *  # Importando modelos desde models.py
 from .serializers import RegisterSerializer
 
 # Cargar variables de entorno
 load_dotenv()
-keyApi = os.environ['OPENAI_API_KEY']  # Asegúrate de usar la clave correcta
+
 
 # Página de inicio
 def index(request):
     return render(request, 'api/index.html')
 
+# Configurar la API Key de OpenAI
+openai.api_key = os.getenv('OPENAI_API_KEY')
+
 @csrf_exempt
+@api_view(['POST'])
 def interpret_text(request):
     if request.method == 'POST':
         try:
@@ -29,19 +33,16 @@ def interpret_text(request):
             text_input = data.get('text', '')
 
             if not text_input:
-                return JsonResponse({'error': 'No text provided'}, status=400)
+                return JsonResponse({'error': 'No se proporcionó texto'}, status=400)
 
-            # Configurar la API Key de OpenAI
-            openai.api_key = keyApi
-
-            # Llamada a la API de OpenAI usando la nueva sintaxis (>=1.0.0)
+            # Llamada a la API de OpenAI
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",  # Modelo más avanzado compatible con chat
+                model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "Eres un asistente que responde en español."},
+                    {"role": "system", "content": "Eres un asistente que responde en español y conoce sobre gimnasios y las máquinas, tienes la habilidad de guiar a un principiante a utilizar la maquina, las posiciones, la fuerza requerida y el paso a paso mostrando la maquina"},
                     {"role": "user", "content": text_input}
                 ],
-                max_tokens=100,
+                max_tokens=150,  # Ajusta la cantidad de tokens según tu necesidad
                 temperature=0.7
             )
 
@@ -51,11 +52,12 @@ def interpret_text(request):
             return JsonResponse({'response': generated_text}, status=200)
 
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+            return JsonResponse({'error': 'JSON inválido'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     else:
-        return JsonResponse({'error': 'POST request required'}, status=400)
+        return JsonResponse({'error': 'Se requiere una solicitud POST'}, status=400)
+
 
 @api_view(['POST'])
 def register_user(request):
