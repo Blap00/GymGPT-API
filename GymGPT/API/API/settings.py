@@ -32,7 +32,9 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+
 # Application definition
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -44,6 +46,7 @@ INSTALLED_APPS = [
     'huggingface',
     'rest_framework',
     'rest_framework_simplejwt',
+    'corsheaders'
 ]
 
 REST_FRAMEWORK = {
@@ -63,13 +66,40 @@ SIMPLE_JWT = {
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+# Enable CORS
+
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:4200",  # Si estás ejecutando Ionic localmente
+#     # Otros dominios que necesites permitir
+# ]
+
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+# Para permitir métodos adicionales (opcional)
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+    "OPTIONS"
+]
+
+# Para permitir encabezados adicionales (opcional)
+CORS_ALLOW_HEADERS = [
+    "content-type",
+    "authorization"
 ]
 
 ROOT_URLCONF = 'API.urls'

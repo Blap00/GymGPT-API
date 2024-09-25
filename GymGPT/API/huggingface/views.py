@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from rest_framework import generics
+
 from django.views.decorators.csrf import csrf_exempt
 import json
 import openai  # type: ignore
@@ -11,7 +13,7 @@ from rest_framework.decorators import api_view  # type: ignore
 
 # Importar modelos y serializers
 from .models import *  # Importando modelos desde models.py
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, LoginSerializer
 
 # Cargar variables de entorno
 load_dotenv()
@@ -61,9 +63,25 @@ def interpret_text(request):
 
 @api_view(['POST'])
 def register_user(request):
+    print("Over register Section!")
     if request.method == 'POST':
+        print("Over register Section POST!")
+        print("DATA:")
+        print(request.data)
         serializer = RegisterSerializer(data=request.data)
+        
         if serializer.is_valid():
+            print("Over register Section IS VALID!")
             serializer.save()
             return Response({"message": "Usuario registrado con éxito"}, status=status.HTTP_201_CREATED)
+        else:
+            print(serializer.errors)
+            return Response({"message": "Usuario no registrado"}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+def LoginView(request):
+    serializer = LoginSerializer(data=request.data)
+    if(serializer.is_valid):
+        user = serializer.validated_data['user']
+        return Response({"message": "Inicio de sesión exitoso", "user": user.username}, status=status.HTTP_200_OK)
+
