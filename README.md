@@ -68,7 +68,7 @@ Sigue estos pasos para configurar el proyecto en tu entorno local:
 
     3. Configura la base de datos SQLITE:
 
-        - Configura la base de datos SQLITE segun el requerimiento.
+        - Configura la base de datos MySQL segun el requerimiento.
 
     4. Ejecuta las migraciones para crear las tablas necesarias:
 
@@ -92,13 +92,12 @@ El proyecto está dividido en dos partes principales:
 
 ### Ejecución
 
-Una vez completados los pasos anteriores, deberías poder acceder a la aplicación en tu navegador en la dirección `http://localhost:8000` para el frontend y `http://localhost:3000` para la API del backend.
+Una vez completados los pasos anteriores, deberías poder acceder a la aplicación en tu navegador en la dirección `http://localhost:8000` para el backend y `http://localhost:4200` para la API del frontend.
 
 ¡Ya estás listo para comenzar a desarrollar y probar el proyecto!
 
 
 ## ⛏️ Build fue realizada gracias a <a name = "built_using"></a>
-
 
 - [Python Django](https://www.djangoproject.com/)
 
