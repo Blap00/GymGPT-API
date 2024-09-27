@@ -29,7 +29,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 
@@ -77,31 +77,26 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# Enable CORS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8100",  # Tu aplicación Ionic
+    "http://127.0.0.1:8100",
+]
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:4200",  # Si estás ejecutando Ionic localmente
-#     # Otros dominios que necesites permitir
-# ]
+# Si ya tienes CORS_ALLOW_ALL_ORIGINS = True, coméntala o elimínala
+# CORS_ALLOW_ALL_ORIGINS = True  # No la uses si estás especificando orígenes
 
-
-CORS_ALLOW_ALL_ORIGINS = True
-
-# Para permitir métodos adicionales (opcional)
 CORS_ALLOW_METHODS = [
     "GET",
     "POST",
     "PUT",
     "DELETE",
-    "OPTIONS"
+    "OPTIONS",
 ]
 
-# Para permitir encabezados adicionales (opcional)
 CORS_ALLOW_HEADERS = [
     "content-type",
-    "authorization"
+    "authorization",
 ]
-
 ROOT_URLCONF = 'API.urls'
 
 TEMPLATES = [
@@ -171,6 +166,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'huggingface.authentication.EmailOrUsernameBackend',  # Reemplaza con el nombre correcto de tu app
+    'django.contrib.auth.backends.ModelBackend',  # Mantén el backend por defecto
+]
 
 AUTH_USER_MODEL = 'huggingface.customuser'
 

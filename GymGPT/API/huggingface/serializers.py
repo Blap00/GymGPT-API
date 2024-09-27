@@ -24,17 +24,30 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
+    email = serializers.EmailField(required=False)
+    username_or_email = serializers.CharField(required=False)
     password = serializers.CharField(required=True, write_only=True)
 
     def validate(self, attrs):
         email = attrs.get('email')
+        username_or_email = attrs.get('username_or_email')
         password = attrs.get('password')
-        
-        user = authenticate(username=email, password=password)
-        
+
+        # Verificar si se proporciona un email o un nombre de usuario
+        if email:
+            user = CustomUser.objects.filter(email=email).first()
+            if not user:
+                raise serializers.ValidationError('Usuario con este email no encontrado.')
+            username_or_email = user.username
+
+        if not username_or_email:
+            raise serializers.ValidationError('Se requiere un nombre de usuario o email.')
+
+        # Autenticar usando el backend
+        user = authenticate(username=username_or_email, password=password)
+
         if user is None:
             raise serializers.ValidationError('Credenciales incorrectas.')
-        
+
         attrs['user'] = user
         return attrs

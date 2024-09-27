@@ -63,25 +63,32 @@ def interpret_text(request):
 
 @api_view(['POST'])
 def register_user(request):
-    print("Over register Section!")
     if request.method == 'POST':
-        print("Over register Section POST!")
-        print("DATA:")
-        print(request.data)
         serializer = RegisterSerializer(data=request.data)
         
         if serializer.is_valid():
-            print("Over register Section IS VALID!")
             serializer.save()
             return Response({"message": "Usuario registrado con éxito"}, status=status.HTTP_201_CREATED)
         else:
             print(serializer.errors)
             return Response({"message": "Usuario no registrado"}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+@api_view(['POST'])
 def LoginView(request):
-    serializer = LoginSerializer(data=request.data)
-    if(serializer.is_valid):
-        user = serializer.validated_data['user']
-        return Response({"message": "Inicio de sesión exitoso", "user": user.username}, status=status.HTTP_200_OK)
+    if request.method == 'POST':    
+        print("Data request: ", request.data)
+
+        email = request.data.get('email', None)
+        username = CustomUser.objects.filter(email=email).first() if email else None
+        print(f"User found: {username.username if username else 'No user'}")
+
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            print("Serializer is valid")
+            user = serializer.validated_data['user']
+            return Response({"message": "Inicio de sesión exitoso", "user": user.username}, status=status.HTTP_200_OK)
+        else:
+            print("Serializer errors: ", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
