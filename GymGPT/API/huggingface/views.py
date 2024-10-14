@@ -24,7 +24,7 @@ def index(request):
     return render(request, 'api/index.html')
 
 # Configurar la API Key de OpenAI
-openai.api_key = os.getenv('OPENAI_API_KEY')
+openai.api_key = os.environ.get('OPENAI_API_KEY')
 
 @csrf_exempt
 @api_view(['POST'])
@@ -44,7 +44,7 @@ def interpret_text(request):
                     {"role": "system", "content": "Eres un asistente que responde en español y conoce sobre gimnasios y las máquinas, tienes la habilidad de guiar a un principiante a utilizar la maquina, las posiciones, la fuerza requerida y el paso a paso mostrando la maquina"},
                     {"role": "user", "content": text_input}
                 ],
-                max_tokens=150,  # Ajusta la cantidad de tokens según tu necesidad
+                max_tokens=1600,  # Ajusta la cantidad de tokens según tu necesidad
                 temperature=0.7
             )
 
@@ -65,17 +65,18 @@ def interpret_text(request):
 def register_user(request):
     if request.method == 'POST':
         serializer = RegisterSerializer(data=request.data)
-        
+
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "Usuario registrado con éxito"}, status=status.HTTP_201_CREATED)
         else:
             print(serializer.errors)
-            return Response({"message": "Usuario no registrado"}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Envía los errores detallados en la respuesta
+            return Response({"message": "Usuario no registrado", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(['POST'])
 def LoginView(request):
-    if request.method == 'POST':    
+    if request.method == 'POST':
         print("Data request: ", request.data)
 
         email = request.data.get('email', None)
@@ -90,5 +91,5 @@ def LoginView(request):
         else:
             print("Serializer errors: ", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 
