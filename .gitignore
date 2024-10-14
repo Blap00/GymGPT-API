@@ -3,3 +3,11 @@
 /GymGPT/API/API/.env
 /GymGPT/virtualNitro5
 /GymGPT/virtualNitro5/*
+
+settings.py
+
+# Ignorar archivos .pyc
+*.pyc
+
+# Ignorar carpetas __pycache__
+__pycache__/
