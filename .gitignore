@@ -5,9 +5,11 @@
 /GymGPT/virtualNitro5/*
 
 settings.py
-
+manage.py
 # Ignorar archivos .pyc
 *.pyc
 
 # Ignorar carpetas __pycache__
 __pycache__/
+/GymGPT/API/manage.py
+GymGPT/API/manage.py

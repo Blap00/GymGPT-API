@@ -82,7 +82,19 @@ Sigue estos pasos para configurar el proyecto en tu entorno local:
         ```bash
         python manage.py runserver
         ```
-python manage.py startapp huggingface
+    6. Escribe las variables de entorno en Manage.py
+
+        ```python
+        os.environ['SECRET_KEY'] = 'Secret Key'
+        os.environ['OPENAI_API_KEY'] = 'API KEY OPENAI'
+        os.environ['PORT'] = 'PORT'
+        os.environ['HOST'] = 'HOST'
+        os.environ['DB_NAME'] = 'DB_Name'
+        os.environ['DB_USER'] = 'DB_User'
+        os.environ['DB_PASSWORD'] = 'DB_Password'
+        os.environ['DEBUG'] = 'TRUE/FALSE'
+        ```
+        --Recuerda que estas variables, NO LA DEBES ACTUALIZAR
 ### Estructura del Proyecto
 
 El proyecto está dividido en dos partes principales:
@@ -90,9 +102,9 @@ El proyecto está dividido en dos partes principales:
 - **Backend**: Ubicado en el repositorio `GymGPT-API`, manejado por Python Django.
 - **Frontend**: Ubicado en el repositorio `GymGPT-FRONT`, construido con React para manejar las solicitudes HTTP.
 
-### Ejecución
+### Ejecución local
 
-Una vez completados los pasos anteriores, deberías poder acceder a la aplicación en tu navegador en la dirección `http://localhost:8000` para el backend y `http://localhost:4200` para la API del frontend.
+Una vez completados los pasos anteriores, deberías poder acceder a la aplicación en tu navegador en la dirección `http://localhost:8080` para el backend y `http://localhost:8100` para la API del frontend.
 
 ¡Ya estás listo para comenzar a desarrollar y probar el proyecto!
 
