@@ -139,6 +139,13 @@ AUTHENTICATION_BACKENDS = [
 AUTH_USER_MODEL = 'huggingface.customuser'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
+
+#StaticFILES
+STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STATICFILES_DIRS = (os.path.join(BASE_DIR, '../huggingface/static'),)
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
