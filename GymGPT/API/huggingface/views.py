@@ -29,37 +29,37 @@ openai.api_key = os.environ.get('OPENAI_API_KEY')
 @csrf_exempt
 @api_view(['POST'])
 def interpret_text(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            text_input = data.get('text', '')
+    try:
+        # Obtener los datos de la solicitud
+        data = request.data
+        text_input = data.get('text', '').strip()
 
-            if not text_input:
-                return JsonResponse({'error': 'No se proporcionó texto'}, status=400)
+        if not text_input:
+            return Response({'error': 'No se proporcionó texto'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Llamada a la API de OpenAI
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "Eres un asistente que responde en español y conoce sobre gimnasios y las máquinas, tienes la habilidad de guiar a un principiante a utilizar la maquina, las posiciones, la fuerza requerida y el paso a paso mostrando la maquina"},
-                    {"role": "user", "content": text_input}
-                ],
-                max_tokens=1600,  # Ajusta la cantidad de tokens según tu necesidad
-                temperature=0.7
-            )
+        # Obtener la configuración desde la base de datos
+        config = OpenAIConfig.objects.first()
+        if not config:
+            return Response({'error': 'No se ha configurado la API de OpenAI'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            # Extraer la respuesta generada
-            generated_text = response['choices'][0]['message']['content'].strip()
+        # Llamada a la API de OpenAI con los valores de la configuración
+        response = openai.ChatCompletion.create(
+            model=config.model,
+            messages=[
+                {"role": "system", "content": config.system_message},
+                {"role": "user", "content": text_input}
+            ],
+            max_tokens=config.max_tokens,
+            temperature=config.temperature
+        )
 
-            return JsonResponse({'response': generated_text}, status=200)
+        # Extraer la respuesta generada
+        generated_text = response['choices'][0]['message']['content'].strip()
 
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'JSON inválido'}, status=400)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-    else:
-        return JsonResponse({'error': 'Se requiere una solicitud POST'}, status=400)
+        return Response({'response': generated_text}, status=status.HTTP_200_OK)
 
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 def register_user(request):
