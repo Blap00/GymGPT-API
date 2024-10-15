@@ -38,10 +38,10 @@ REST_FRAMEWORK = {
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': True,
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1)
+    # 'ROTATE_REFRESH_TOKENS': False,
+    # 'BLACKLIST_AFTER_ROTATION': True,
 }
 
 MIDDLEWARE = [
@@ -135,8 +135,16 @@ AUTHENTICATION_BACKENDS = [
     'huggingface.authentication.EmailOrUsernameBackend',  # Reemplaza con el nombre correcto de tu app
     'django.contrib.auth.backends.ModelBackend',  # Mantén el backend por defecto
 ]
-
+# AUTH USER MODIFICATIONS
 AUTH_USER_MODEL = 'huggingface.customuser'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+
+#StaticFILES
+STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STATICFILES_DIRS = (os.path.join(BASE_DIR, '../huggingface/static'),)
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
