@@ -13,7 +13,7 @@ from rest_framework.decorators import api_view  # type: ignore
 
 # Importar modelos y serializers
 from .models import *  # Importando modelos desde models.py
-from .serializers import RegisterSerializer, LoginSerializer, UserEditSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserEditSerializer, FeedbackSerializer
 
 # Cargar variables de entorno
 load_dotenv()
@@ -106,3 +106,8 @@ class UserEditView(generics.UpdateAPIView):
         Obtiene el usuario autenticado que realizará la actualización.
         """
         return self.request.user
+    
+class FeedbackCreateView(generics.CreateAPIView):
+    queryset = FeedbackModel.objects.all()
+    serializer_class = FeedbackSerializer
+    permission_classes = [permissions.IsAuthenticated]

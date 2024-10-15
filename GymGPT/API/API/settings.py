@@ -135,9 +135,10 @@ AUTHENTICATION_BACKENDS = [
     'huggingface.authentication.EmailOrUsernameBackend',  # Reemplaza con el nombre correcto de tu app
     'django.contrib.auth.backends.ModelBackend',  # Mantén el backend por defecto
 ]
-
+# AUTH USER MODIFICATIONS
 AUTH_USER_MODEL = 'huggingface.customuser'
-
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 

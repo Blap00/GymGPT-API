@@ -1,5 +1,5 @@
 from rest_framework import serializers # type: ignore
-from .models import CustomUser  # Importa tu modelo de usuario personalizado
+from .models import CustomUser, FeedbackModel  # Importa tu modelo de usuario personalizado
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
 
@@ -73,3 +73,10 @@ class UserEditSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+    
+
+class FeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FeedbackModel
+        fields = ['id', 'first_name', 'last_name', 'email', 'feedback', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
