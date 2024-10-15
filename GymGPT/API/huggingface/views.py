@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from rest_framework import generics
-
+from rest_framework import generics,permissions
+from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
 import json
 import openai  # type: ignore
@@ -13,11 +13,11 @@ from rest_framework.decorators import api_view  # type: ignore
 
 # Importar modelos y serializers
 from .models import *  # Importando modelos desde models.py
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserEditSerializer
 
 # Cargar variables de entorno
 load_dotenv()
-
+User = get_user_model()
 
 # Página de inicio
 def index(request):
@@ -92,4 +92,17 @@ def LoginView(request):
             print("Serializer errors: ", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+User = get_user_model()
 
+class UserEditView(generics.UpdateAPIView):
+    """
+    Vista para permitir que los usuarios editen su perfil.
+    """
+    serializer_class = UserEditSerializer
+    permission_classes = [permissions.IsAuthenticated]  # Solo usuarios autenticados pueden actualizarse
+
+    def get_object(self):
+        """
+        Obtiene el usuario autenticado que realizará la actualización.
+        """
+        return self.request.user
