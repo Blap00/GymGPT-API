@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from rest_framework import generics,permissions
+from rest_framework import generics,permissions # type: ignore
 from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -87,7 +87,7 @@ def LoginView(request):
         if serializer.is_valid():
             print("Serializer is valid")
             user = serializer.validated_data['user']
-            return Response({"message": "Inicio de sesión exitoso", "user": user.username}, status=status.HTTP_200_OK)
+            return Response({"message": "Inicio de sesión exitoso", "user": user.id}, status=status.HTTP_200_OK)
         else:
             print("Serializer errors: ", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -111,3 +111,88 @@ class FeedbackCreateView(generics.CreateAPIView):
     queryset = FeedbackModel.objects.all()
     serializer_class = FeedbackSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+# Fittness GOAL ROUTINE
+
+@csrf_exempt
+@api_view(['POST'])
+def generate_routine(request, usuarioID):
+    try:
+        # Obtener los datos del usuario
+        userID = CustomUser.objects.get(id=usuarioID)
+        user = userID
+        data = request.data
+
+        # Opcional: recibe el objetivo de fitness desde el frontend
+        fitness_goal = data.get('fitness_goal', 'ganar músculo').strip()
+
+        if not fitness_goal:
+            return Response({'error': 'No se proporcionó el objetivo de fitness'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Obtener la configuración de OpenAI desde la base de datos
+        config = OpenAIConfig.objects.first()
+        if not config:
+            return Response({'error': 'No se ha configurado la API de OpenAI'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Preparar el prompt para la generación de la rutina personalizada
+        prompt = (
+            f"Genera una rutina de ejercicios personalizada para {user.first_name}. "
+            f"El objetivo es {fitness_goal}. "
+            "Incluye ejercicios para los diferentes grupos musculares, número de series, repeticiones y tiempo estimado para completar cada ejercicio."
+        )
+
+        # Llamar a la API de OpenAI para generar la rutina
+        response = openai.ChatCompletion.create(
+            model=config.model,
+            messages=[
+                {"role": "system", "content": config.system_message},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=config.max_tokens,
+            temperature=config.temperature
+        )
+
+        # Extraer la rutina generada
+        routine_text = response['choices'][0]['message']['content'].strip()
+        routine_instance = FitnessRoutine(user=user, goal=fitness_goal, routine=routine_text)
+        routine_instance.save()
+        # Enviar la respuesta con la rutina generada
+        return Response({'routine': routine_text}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+User = get_user_model()
+
+@api_view(['GET'])
+def get_user(request, id):
+    try:
+        user = CustomUser.objects.filter(id=id).first()
+        # Aquí puedes incluir los campos que desees retornar
+        routines = FitnessRoutine.objects.filter(user = user)  # Obtén todas las rutinas del usuario
+
+        # Formatear las rutinas
+        routines_data = [
+            {
+                'user': routine.user,
+                'goal': routine.goal,
+                'routine': routine.routine,
+                'created_at': routine.created_at,
+            } for routine in routines
+        ]
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'routines': routines_data,
+            # Incluye otros campos según sea necesario
+        }
+        return JsonResponse({"user":user_data}, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        print("Error"+str(e))
+        return JsonResponse({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

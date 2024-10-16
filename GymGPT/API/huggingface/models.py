@@ -39,3 +39,11 @@ class OpenAIConfig(models.Model):
 
     def __str__(self):
         return f"Configuración de OpenAI (Modelo: {self.model})"
+    
+
+class FitnessRoutine(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    goal = models.CharField(max_length=255)
+    routine = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
