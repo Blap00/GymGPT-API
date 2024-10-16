@@ -8,15 +8,22 @@ from django.contrib.auth import get_user_model
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'password']  # Asegúrate de incluir todos los campos necesarios
+        fields = ['first_name', 'last_name', 'email', 'password']  
 
     def create(self, validated_data):
+        email = validated_data['email']
+        username = email.split('@')[0]
+
+        # Crear el usuario utilizando los valores proporcionados
         user = CustomUser(
-            username=validated_data['username'],
-            email=validated_data['email']
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            email=email,
+            username=username
         )
-        user.set_password(validated_data['password'])  # Asegúrate de establecer la contraseña correctamente
+        user.set_password(validated_data['password'])
         user.save()
+        
         return user
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False)
