@@ -3,6 +3,7 @@
 /GymGPT/API/API/.env
 /GymGPT/virtualNitro5
 /GymGPT/virtualNitro5/*
+<<<<<<< Updated upstream
 
 settings.py
 manage.py
@@ -13,3 +14,6 @@ manage.py
 __pycache__/
 /GymGPT/API/manage.py
 GymGPT/API/manage.py
+=======
+venv
+>>>>>>> Stashed changes
