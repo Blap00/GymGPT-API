@@ -192,6 +192,9 @@ def get_user(request, id):
             'email': user.email,
             'first_name': user.first_name,
             'last_name': user.last_name,
+            'height': user.height,
+            'age': user.age,
+            'weight': user.weight,
             'routines': routines_data,
             'image': imagefieldResponse
             # Incluye otros campos según sea necesario
