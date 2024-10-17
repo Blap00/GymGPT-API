@@ -181,6 +181,11 @@ def get_user(request, id):
                 'created_at': routine.created_at,
             } for routine in routines
         ]
+        imagefieldResponse =''
+        if user.image:
+            imagefieldResponse = user.image.url
+        else:
+            imagefieldResponse =''
         user_data = {
             'id': user.id,
             'username': user.username,
@@ -188,6 +193,7 @@ def get_user(request, id):
             'first_name': user.first_name,
             'last_name': user.last_name,
             'routines': routines_data,
+            'image': imagefieldResponse
             # Incluye otros campos según sea necesario
         }
         return JsonResponse({"user":user_data}, status=status.HTTP_200_OK)
