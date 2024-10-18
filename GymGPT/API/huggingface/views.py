@@ -26,7 +26,6 @@ def index(request):
 # Configurar la API Key de OpenAI
 openai.api_key = os.environ.get('OPENAI_API_KEY')
 
-@csrf_exempt
 @api_view(['POST'])
 def interpret_text(request):
     try:
@@ -100,11 +99,11 @@ class UserEditView(generics.UpdateAPIView):
     """
     serializer_class = UserEditSerializer
     permission_classes = [permissions.IsAuthenticated]  # Solo usuarios autenticados pueden actualizarse
-
     def get_object(self):
         """
         Obtiene el usuario autenticado que realizará la actualización.
         """
+        # print(self.request.user)
         return self.request.user
     
 class FeedbackCreateView(generics.CreateAPIView):
@@ -115,7 +114,6 @@ class FeedbackCreateView(generics.CreateAPIView):
 
 # Fittness GOAL ROUTINE
 
-@csrf_exempt
 @api_view(['POST'])
 def generate_routine(request, usuarioID):
     try:
@@ -181,13 +179,22 @@ def get_user(request, id):
                 'created_at': routine.created_at,
             } for routine in routines
         ]
+        imagefieldResponse =''
+        if user.image:
+            imagefieldResponse = user.image.url
+        else:
+            imagefieldResponse =''
         user_data = {
             'id': user.id,
             'username': user.username,
             'email': user.email,
             'first_name': user.first_name,
             'last_name': user.last_name,
+            'height': user.height,
+            'age': user.age,
+            'weight': user.weight,
             'routines': routines_data,
+            'image': imagefieldResponse
             # Incluye otros campos según sea necesario
         }
         return JsonResponse({"user":user_data}, status=status.HTTP_200_OK)
@@ -196,3 +203,7 @@ def get_user(request, id):
     except Exception as e:
         print("Error"+str(e))
         return JsonResponse({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+
+
