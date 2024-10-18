@@ -4,6 +4,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
 
 from django.contrib.auth import get_user_model
+from PIL import Image
+from io import BytesIO
 
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -53,33 +55,31 @@ class LoginSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
-    
+
 
 class UserEditSerializer(serializers.ModelSerializer):
-    # Se define el campo password para poder actualizarlo
     password = serializers.CharField(write_only=True, required=False, validators=[validate_password])
+    image = serializers.ImageField(required=False)
 
     class Meta:
         model = CustomUser
-        # Incluye los campos que el usuario podrá editar
-        fields = ['first_name', 'last_name', 'password', 'age', 'height', 'weight', 'gender']
+        fields = ['first_name', 'last_name', 'password', 'age', 'height', 'weight', 'gender', 'image']
 
-    def update(self, instance, validated_data):
-        # Actualizar los campos del usuario
-        instance.first_name = validated_data.get('first_name', instance.first_name)
-        instance.last_name = validated_data.get('last_name', instance.last_name)
-        instance.age = validated_data.get('age', instance.age)
-        instance.height = validated_data.get('height', instance.height)
-        instance.weight = validated_data.get('weight', instance.weight)
-        instance.gender = validated_data.get('gender', instance.gender)
+    def validate_image(self, value):
+        """Validar que el archivo es una imagen y cumple los requisitos."""
+        if value.size > 5 * 1024 * 1024:  # Límite de 5MB
+            raise serializers.ValidationError("La imagen es demasiado grande (máx. 5MB).")
 
-        # Solo establece una nueva contraseña si se proporciona
-        password = validated_data.get('password', None)
-        if password:
-            instance.set_password(password)
+        # Verificar si es un archivo de imagen válido
+        try:
+            # Intentar abrir la imagen con Pillow
+            img = Image.open(value)
+            img.verify()  # Verifica que la imagen no esté corrupta
+        except (IOError, SyntaxError):
+            raise serializers.ValidationError("Sube una imagen válida. El archivo subido no es una imagen válida o está corrupto.")
 
-        instance.save()
-        return instance
+        return value
+
     
 
 class FeedbackSerializer(serializers.ModelSerializer):

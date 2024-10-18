@@ -38,7 +38,7 @@ REST_FRAMEWORK = {
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=4),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1)
     # 'ROTATE_REFRESH_TOKENS': False,
     # 'BLACKLIST_AFTER_ROTATION': True,
@@ -96,12 +96,6 @@ WSGI_APPLICATION = 'API.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 # Debugging: Imprimir las variables de entorno (temporal)
-print("DB_NAME:", os.environ.get('DB_NAME'))
-print("DB_USER:", os.environ.get('DB_USER'))
-print("DB_PASSWORD:", os.environ.get('DB_PASSWORD'))
-print("HOST:", os.environ.get('HOST'))
-print("PORT:", os.environ.get('PORT'))
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
