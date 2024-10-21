@@ -9,7 +9,9 @@ from dotenv import load_dotenv
 import os
 from rest_framework import status  # type: ignore
 from rest_framework.response import Response  # type: ignore
-from rest_framework.decorators import api_view  # type: ignore
+from rest_framework.decorators import api_view, permission_classes  # type: ignore
+from rest_framework.permissions import IsAuthenticated # type: ignore
+
 
 # Importar modelos y serializers
 from .models import *  # Importando modelos desde models.py
@@ -19,25 +21,84 @@ from .serializers import RegisterSerializer, LoginSerializer, UserEditSerializer
 load_dotenv()
 User = get_user_model()
 
-# Página de inicio
-def index(request):
-    return render(request, 'api/index.html')
+# # Página de inicio
+# def index(request):
+#     return render(request, 'api/index.html')
 
 # Configurar la API Key de OpenAI
 openai.api_key = os.environ.get('OPENAI_API_KEY')
+User = get_user_model()
 
+
+# IT WILL GIVE MACHINE INFO, CONFIGURED INSIDE THE MODELS
 @api_view(['POST'])
-def interpret_text(request):
+@permission_classes([IsAuthenticated])
+def interpret_MachineInfo(request):
     try:
         # Obtener los datos de la solicitud
         data = request.data
-        text_input = data.get('text', '').strip()
+        machine_input = data.get('machine_type', '').strip()
+
+        if not machine_input:
+            return Response({'error': 'No se proporcionó el tipo de máquina'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Obtener la configuración desde la base de datos
+        config = OpenAIConfig.objects.filter(use='Give machine INFO').first()
+        if not config:
+            return Response({'error': 'No se ha configurado la API de OpenAI'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # Llamada a la API de OpenAI con los valores de la configuración
+        response = openai.ChatCompletion.create(
+            model=config.model,
+            messages=[
+                {"role": "system", "content": config.system_message},
+                {"role": "user", "content": f"Describe la máquina {machine_input} y sus características."}
+            ],
+            max_tokens=config.max_tokens,
+            temperature=config.temperature
+        )
+        tipo_maquina = openai.ChatCompletion.create(
+            model=config.model,
+            messages=[
+                {"role": "system", "content": config.system_message},
+                {"role": "user", "content": f"Que tipo de maquina es {machine_input}"}
+            ],
+            max_tokens=config.max_tokens,
+            temperature=config.temperature
+        )
+        # Extraer la respuesta generada
+        generated_text = response['choices'][0]['message']['content'].strip()
+        tipo_maquina = tipo_maquina['choices'][0]['message']['content'].strip()
+
+        # Almacenar la rutina generada en la base de datos
+        user = request.user  # Obtener el usuario autenticado
+        machine = MachineInfoGeneratedAI(
+            usuario=user,  # Aquí user será la instancia correcta de CustomUser si está autenticado
+            nom_maquina=machine_input,
+            tipo_maquina = tipo_maquina,
+            AI_use=config,
+            MachineInfo=generated_text
+        )
+        machine.save()
+
+        return Response({'response': generated_text}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# IT WILL GIVE ROUTINE INFO, CONFIGURED INSIDE THE MODELS
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])  # Añadir permiso de autenticación
+def interpret_Routine(request):
+    try:
+        # Obtener los datos de la solicitud
+        data = request.data
+        text_input = data.get('routine', '').strip()
 
         if not text_input:
             return Response({'error': 'No se proporcionó texto'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Obtener la configuración desde la base de datos
-        config = OpenAIConfig.objects.first()
+        config = OpenAIConfig.objects.filter(use='Give Routine INFO').first()
         if not config:
             return Response({'error': 'No se ha configurado la API de OpenAI'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -52,13 +113,24 @@ def interpret_text(request):
             temperature=config.temperature
         )
 
-        # Extraer la respuesta generada
+        # Extraer la respuesta generada por OpenAI
         generated_text = response['choices'][0]['message']['content'].strip()
 
-        return Response({'response': generated_text}, status=status.HTTP_200_OK)
+        # Almacenar la rutina generada en la base de datos
+        user = request.user  # Obtener el usuario autenticado
+        routine = RoutineGeneratedAI(
+            usuario=user,  # Aquí user será la instancia correcta de CustomUser si está autenticado
+            AI_use=config,
+            routineGenerated=generated_text
+        )
+        routine.save()
+
+        # Retornar la respuesta y confirmar el guardado
+        return Response({'response': generated_text, 'message': 'Rutina generada y almacenada con éxito'}, status=status.HTTP_200_OK)
 
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['POST'])
 def register_user(request):
@@ -91,8 +163,6 @@ def LoginView(request):
             print("Serializer errors: ", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-User = get_user_model()
-
 class UserEditView(generics.UpdateAPIView):
     """
     Vista para permitir que los usuarios editen su perfil.
@@ -112,55 +182,6 @@ class FeedbackCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
 
-# Fittness GOAL ROUTINE
-
-@api_view(['POST'])
-def generate_routine(request, usuarioID):
-    try:
-        # Obtener los datos del usuario
-        userID = CustomUser.objects.get(id=usuarioID)
-        user = userID
-        data = request.data
-
-        # Opcional: recibe el objetivo de fitness desde el frontend
-        fitness_goal = data.get('fitness_goal', 'ganar músculo').strip()
-
-        if not fitness_goal:
-            return Response({'error': 'No se proporcionó el objetivo de fitness'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Obtener la configuración de OpenAI desde la base de datos
-        config = OpenAIConfig.objects.first()
-        if not config:
-            return Response({'error': 'No se ha configurado la API de OpenAI'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        # Preparar el prompt para la generación de la rutina personalizada
-        prompt = (
-            f"Genera una rutina de ejercicios personalizada para {user.first_name}. "
-            f"El objetivo es {fitness_goal}. "
-            "Incluye ejercicios para los diferentes grupos musculares, número de series, repeticiones y tiempo estimado para completar cada ejercicio."
-        )
-
-        # Llamar a la API de OpenAI para generar la rutina
-        response = openai.ChatCompletion.create(
-            model=config.model,
-            messages=[
-                {"role": "system", "content": config.system_message},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=config.max_tokens,
-            temperature=config.temperature
-        )
-
-        # Extraer la rutina generada
-        routine_text = response['choices'][0]['message']['content'].strip()
-        routine_instance = FitnessRoutine(user=user, goal=fitness_goal, routine=routine_text)
-        routine_instance.save()
-        # Enviar la respuesta con la rutina generada
-        return Response({'routine': routine_text}, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 User = get_user_model()
 
 @api_view(['GET'])
@@ -168,7 +189,7 @@ def get_user(request, id):
     try:
         user = CustomUser.objects.filter(id=id).first()
         # Aquí puedes incluir los campos que desees retornar
-        routines = FitnessRoutine.objects.filter(user = user)  # Obtén todas las rutinas del usuario
+        routines = RoutineGeneratedAI.objects.filter(user = user)  # Obtén todas las rutinas del usuario
 
         # Formatear las rutinas
         routines_data = [

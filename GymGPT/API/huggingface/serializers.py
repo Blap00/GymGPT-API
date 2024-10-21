@@ -1,5 +1,5 @@
 from rest_framework import serializers # type: ignore
-from .models import CustomUser, FeedbackModel, FitnessRoutine  # Importa tu modelo de usuario personalizado
+from .models import *  # Importa tu modelo de usuario personalizado
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
 
@@ -57,39 +57,44 @@ class LoginSerializer(serializers.Serializer):
         return attrs
 
 
+from django.contrib.auth.hashers import check_password
+
 class UserEditSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=False, validators=[validate_password])
-    image = serializers.ImageField(required=False)
+
+    current_password = serializers.CharField(write_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'password', 'age', 'height', 'weight', 'gender', 'image']
+        # Incluye los campos que el usuario podrá editar (sin 'password')
+        fields = ['first_name', 'last_name', 'current_password', 'age', 'height', 'weight', 'gender']
 
-    def validate_image(self, value):
-        """Validar que el archivo es una imagen y cumple los requisitos."""
-        if value.size > 5 * 1024 * 1024:  # Límite de 5MB
-            raise serializers.ValidationError("La imagen es demasiado grande (máx. 5MB).")
-
-        # Verificar si es un archivo de imagen válido
-        try:
-            # Intentar abrir la imagen con Pillow
-            img = Image.open(value)
-            img.verify()  # Verifica que la imagen no esté corrupta
-        except (IOError, SyntaxError):
-            raise serializers.ValidationError("Sube una imagen válida. El archivo subido no es una imagen válida o está corrupto.")
-
+    def validate_current_password(self, value):
+        """
+        Verifica que la contraseña actual proporcionada sea correcta.
+        """
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("La contraseña actual no es correcta.")
         return value
 
-    
+    def update(self, instance, validated_data):
+        # Eliminamos la contraseña actual del diccionario de datos validados
+        validated_data.pop('current_password', None)
+
+        # Actualizamos solo los otros campos
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.age = validated_data.get('age', instance.age)
+        instance.height = validated_data.get('height', instance.height)
+        instance.weight = validated_data.get('weight', instance.weight)
+        instance.gender = validated_data.get('gender', instance.gender)
+
+        # Guardamos las actualizaciones
+        instance.save()
+        return instance
 
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = FeedbackModel
         fields = ['id', 'first_name', 'last_name', 'email', 'feedback', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
-
-
-class FitnessRoutineSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FitnessRoutine
-        fields = ['user', 'goal', 'routine', 'created_at']
