@@ -56,14 +56,25 @@ def interpret_MachineInfo(request):
             max_tokens=config.max_tokens,
             temperature=config.temperature
         )
-
+        tipo_maquina = openai.ChatCompletion.create(
+            model=config.model,
+            messages=[
+                {"role": "system", "content": config.system_message},
+                {"role": "user", "content": f"Que tipo de maquina es {machine_input}"}
+            ],
+            max_tokens=config.max_tokens,
+            temperature=config.temperature
+        )
         # Extraer la respuesta generada
         generated_text = response['choices'][0]['message']['content'].strip()
+        tipo_maquina = tipo_maquina['choices'][0]['message']['content'].strip()
 
         # Almacenar la rutina generada en la base de datos
         user = request.user  # Obtener el usuario autenticado
         machine = MachineInfoGeneratedAI(
             usuario=user,  # Aquí user será la instancia correcta de CustomUser si está autenticado
+            nom_maquina=machine_input,
+            tipo_maquina = tipo_maquina,
             AI_use=config,
             MachineInfo=generated_text
         )
