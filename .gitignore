@@ -13,3 +13,4 @@ manage.py
 __pycache__/
 /GymGPT/API/manage.py
 GymGPT/API/manage.py
+*manage.py
