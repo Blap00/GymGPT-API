@@ -25,6 +25,7 @@ class FeedbackModel(models.Model):
         return str(self.id)
 
 class OpenAIConfig(models.Model):
+    use = models.CharField(max_length=50, default='Ninguno', help_text="Cual es el Uso de esta configuración")
     model = models.CharField(max_length=50, default='gpt-3.5-turbo', help_text="Modelo de OpenAI a utilizar.")
     temperature = models.FloatField(default=0.7, help_text="Controla la aleatoriedad de las respuestas (0 a 2).")
     max_tokens = models.IntegerField(default=1600, help_text="Número máximo de tokens en la respuesta.")
@@ -37,25 +38,27 @@ class OpenAIConfig(models.Model):
     def __str__(self):
         return f"Configuración de OpenAI (Modelo: {self.model})"
 
-
-class FitnessRoutine(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    goal = models.CharField(max_length=255)
-    routine = models.TextField()
+class RoutineGeneratedAI(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    usuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null= False, default=None )
+    AI_use = models.ForeignKey(OpenAIConfig, on_delete=models.CASCADE, null= False, default=None)
+    routineGenerated = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
-        return f"Rutina del usuario {self.user.first_name}, objetivo: {self.goal}"
+        return f"Rutina generada por OpenAI ({self.AI_use.model}) por usuario {self.usuario.username}"
 
-
-class Maquinas(models.Model):
+class MachineInfoGeneratedAI(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    usuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null= False, default=None )
+    AI_use = models.ForeignKey(OpenAIConfig, on_delete=models.CASCADE, null= False, default=None)
     nom_maquina = models.CharField(max_length=100)
     tipo_maquina = models.CharField(max_length=100)
-    descripcion_uso = models.TextField
-    inteligencia_artificial = models.ForeignKey(OpenAIConfig,on_delete=models.CASCADE, null=False)
-    usuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    MachineInfo = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
-        return f"Maquina {self.nom_maquina} usada por {self.usuario} con IA {self.inteligencia_artificial}"
-
+        return f"Rutina generada por OpenAI ({self.AI_use.model}) por usuario {self.usuario.username}"
 class Ejercicios(models.Model):
     grupo_muscular = models.CharField(max_length=25)
     niv_dificultad = models.CharField(max_length=25)
@@ -63,7 +66,7 @@ class Ejercicios(models.Model):
     series = models.IntegerField()
     instrucciones = models.TextField()
     videoDemostrativo = models.CharField(max_length=255)
-    maquina = models.ForeignKey(Maquinas, on_delete=models.CASCADE)
+    maquina = models.ForeignKey(MachineInfoGeneratedAI, on_delete=models.CASCADE)
     ia = models.ForeignKey(OpenAIConfig, on_delete=models.CASCADE)
     usuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     def __str__(self):

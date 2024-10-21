@@ -4,7 +4,7 @@ from .models import *
 
 @admin.register(OpenAIConfig)
 class OpenAIConfigAdmin(admin.ModelAdmin):
-    list_display = ('model', 'temperature', 'max_tokens')
+    list_display = ('use', 'model', 'temperature', 'max_tokens')
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
