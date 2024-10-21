@@ -11,7 +11,7 @@ urlpatterns = [
     path('login/', views.LoginView, name='Login_user'),
 
     #MODIFY MODELS
-    path('edit-profile/', views.UserEditView.as_view(), name='edit-profile'),
+    path('edit-profile/', views.UserEditarMultiParser.as_view(), name='edit-profile'),
     path('getuser/<int:id>/', views.get_user, name='get-user'),
     path('feedback/create/', views.FeedbackCreateView.as_view(), name='feedback-create'),
 ]

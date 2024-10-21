@@ -7,10 +7,11 @@ import json
 import openai  # type: ignore
 from dotenv import load_dotenv
 import os
-from rest_framework import status  # type: ignore
+from rest_framework import status, exceptions  # type: ignore
 from rest_framework.response import Response  # type: ignore
 from rest_framework.decorators import api_view, permission_classes  # type: ignore
 from rest_framework.permissions import IsAuthenticated # type: ignore
+from rest_framework.views import APIView # type: ignore
 
 
 # Importar modelos y serializers
@@ -168,19 +169,42 @@ class UserEditView(generics.UpdateAPIView):
     Vista para permitir que los usuarios editen su perfil.
     """
     serializer_class = UserEditSerializer
+    
     permission_classes = [permissions.IsAuthenticated]  # Solo usuarios autenticados pueden actualizarse
     def get_object(self):
+
         """
         Obtiene el usuario autenticado que realizará la actualización.
         """
         # print(self.request.user)
         return self.request.user
-    
+
+
+class UserEditarMultiParser(APIView):
+    def put(self, request, *args, **kwargs):
+        # Obtén el usuario actual
+        user = request.user
+
+        # Verifica si se ha enviado la imagen
+        if 'image' not in request.data:
+            raise exceptions.ParseError("No has seleccionado el archivo a subir")
+
+        # Serializa el usuario con los datos de la solicitud
+        serializer = UserEditSerializer(instance=user, data=request.data, context={'request': request})
+
+        if serializer.is_valid():
+            # Guarda los cambios en la instancia del usuario
+            serializer.save()
+
+            # Devuelve la respuesta con los datos del serializer
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class FeedbackCreateView(generics.CreateAPIView):
     queryset = FeedbackModel.objects.all()
     serializer_class = FeedbackSerializer
     permission_classes = [permissions.IsAuthenticated]
-
 
 User = get_user_model()
 
