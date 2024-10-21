@@ -9,7 +9,7 @@ class CustomUser(AbstractUser):
     height = models.IntegerField(null=True)
     age = models.IntegerField(null=True)
     gender = models.CharField(max_length=10, null=True)
-    image = models.FileField(null=True)
+    image = models.ImageField(null=True)
     def __str__(self):
         return str(self.id)
 # Feedback info
