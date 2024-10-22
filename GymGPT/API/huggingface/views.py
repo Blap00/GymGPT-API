@@ -299,7 +299,7 @@ def get_user(request, id):
         user = CustomUser.objects.filter(id=id).first()
         # Aquí puedes incluir los campos que desees retornar
         routines = RoutineGeneratedAI.objects.filter(
-            user=user)  # Obtén todas las rutinas del usuario
+            usuario=user)  # Obtén todas las rutinas del usuario
 
         # Formatear las rutinas
         routines_data = [
