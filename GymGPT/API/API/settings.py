@@ -129,6 +129,16 @@ AUTHENTICATION_BACKENDS = [
     'huggingface.authentication.EmailOrUsernameBackend',  # Reemplaza con el nombre correcto de tu app
     'django.contrib.auth.backends.ModelBackend',  # Mantén el backend por defecto
 ]
+
+# CACHE
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+
 # AUTH USER MODIFICATIONS
 AUTH_USER_MODEL = 'huggingface.customuser'
 ACCOUNT_EMAIL_REQUIRED = True
@@ -164,3 +174,14 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ENABLE SMTP SERVICE TO MAIL FINAL USER
+# 
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')

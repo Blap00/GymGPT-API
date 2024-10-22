@@ -2,6 +2,8 @@ from rest_framework import serializers # type: ignore
 from .models import *  # Importa tu modelo de usuario personalizado
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
+
 
 from django.contrib.auth import get_user_model
 from PIL import Image
@@ -98,3 +100,47 @@ class FeedbackSerializer(serializers.ModelSerializer):
         model = FeedbackModel
         fields = ['id', 'first_name', 'last_name', 'email', 'feedback', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+
+# RECUPERACION DE CONTRASEÑAS
+class RequestPasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        """
+        Verifica si el correo electrónico proporcionado está asociado a un usuario registrado.
+        """
+        if not CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("No existe un usuario registrado con este correo electrónico.")
+        return value
+    
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    recovery_code = serializers.CharField(max_length=6)
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate_email(self, value):
+        """
+        Verifica si el correo electrónico está registrado.
+        """
+        if not CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("No existe un usuario registrado con este correo electrónico.")
+        return value
+
+    def validate_recovery_code(self, value):
+        """
+        Verifica que el código de recuperación tenga 6 caracteres y que solo contenga dígitos.
+        """
+        if len(value) != 6 or not value.isdigit():
+            raise serializers.ValidationError("El código de recuperación debe tener 6 dígitos.")
+        return value
+
+    def validate_new_password(self, value):
+        """
+        Valida que la nueva contraseña cumpla con ciertos requisitos (mínimo 8 caracteres).
+        """
+        # Puedes añadir más validaciones, como que incluya mayúsculas, números, etc.
+        if len(value) < 8:
+            raise serializers.ValidationError("La nueva contraseña debe tener al menos 8 caracteres.")
+        return value

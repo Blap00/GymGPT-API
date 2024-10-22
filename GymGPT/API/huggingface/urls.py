@@ -14,4 +14,9 @@ urlpatterns = [
     path('edit-profile/', views.UserEditarMultiParser.as_view(), name='edit-profile'),
     path('getuser/<int:id>/', views.get_user, name='get-user'),
     path('feedback/create/', views.FeedbackCreateView.as_view(), name='feedback-create'),
+
+    # RESET PASSWORD
+
+    path('request_password_recovery/', views.RequestPasswordResetView.as_view(), name='Request_Recovery'),
+    path('reset_password/', views.PasswordResetConfirmView.as_view(), name='Reset_password'),
 ]
