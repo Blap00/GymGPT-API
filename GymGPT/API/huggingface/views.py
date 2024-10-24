@@ -57,8 +57,7 @@ def interpret_MachineInfo(request):
             model=config.model,
             messages=[
                 {"role": "system", "content": config.system_message},
-                {"role": "user", "content": f"Describe la máquina {
-                    machine_input} y sus características."}
+                {"role": "user", "content": f'Describe la máquina {machine_input} y sus características.'}
             ],
             max_tokens=config.max_tokens,
             temperature=config.temperature
