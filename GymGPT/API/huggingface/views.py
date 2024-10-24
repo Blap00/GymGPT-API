@@ -57,8 +57,7 @@ def interpret_MachineInfo(request):
             model=config.model,
             messages=[
                 {"role": "system", "content": config.system_message},
-                {"role": "user", "content": f"Describe la máquina {
-                    machine_input} y sus características."}
+                {"role": "user", "content": f'Describe la máquina {machine_input} y sus características.'}
             ],
             max_tokens=config.max_tokens,
             temperature=config.temperature
@@ -299,7 +298,7 @@ def get_user(request, id):
         user = CustomUser.objects.filter(id=id).first()
         # Aquí puedes incluir los campos que desees retornar
         routines = RoutineGeneratedAI.objects.filter(
-            user=user)  # Obtén todas las rutinas del usuario
+            usuario=user)  # Obtén todas las rutinas del usuario
 
         # Formatear las rutinas
         routines_data = [
