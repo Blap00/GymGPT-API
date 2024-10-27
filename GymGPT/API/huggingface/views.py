@@ -345,15 +345,13 @@ class RequestPasswordResetView(generics.GenericAPIView):
             email = serializer.validated_data['email']
 
             try:
-                user = CustomUser.objects.get(email=email)  # Cambia esto
-            except CustomUser.DoesNotExist:  # Cambia aquí también
+                user = CustomUser.objects.get(email=email)
+            except CustomUser.DoesNotExist:
                 return Response({"message": "El correo proporcionado no está registrado."}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Generar y enviar el código de recuperación
             recovery_code = get_random_string(length=6, allowed_chars='0123456789')
             cache.set(f'recovery_code_{user.id}', recovery_code, timeout=600)
 
-            # Enviar el correo con el código de recuperación
             subject = "Recuperación de contraseña"
             html_message = f"""
             <div style="font-family: Arial, sans-serif; color: #333;">
@@ -364,10 +362,12 @@ class RequestPasswordResetView(generics.GenericAPIView):
                 <p>Este código es válido por 10 minutos. Si no solicitaste este correo, ignóralo.</p>
             </div>
             """
-
             from_email = settings.EMAIL_HOST_USER
             recipient_list = [user.email]
-            send_mail(subject, "", from_email, recipient_list, fail_silently=False, html_message=html_message)
+            try:
+                send_mail(subject, "", from_email, recipient_list, html_message=html_message)
+            except Exception as ex:
+                print("Error enviando el correo:", ex)
 
             return Response({"message": "Correo enviado con el código de recuperación."}, status=status.HTTP_200_OK)
 
