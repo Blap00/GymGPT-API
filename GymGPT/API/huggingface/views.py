@@ -21,7 +21,7 @@ from rest_framework import generics, permissions  # type: ignore
 
 # Importar modelos y serializers
 from .models import *  # Importando modelos desde models.py
-from .serializers import RegisterSerializer, LoginSerializer, UserEditSerializer, FeedbackSerializer, PasswordResetConfirmSerializer, RequestPasswordResetSerializer
+from .serializers import *
 
 # Cargar variables de entorno
 load_dotenv()
@@ -350,7 +350,7 @@ class RequestPasswordResetView(generics.GenericAPIView):
                 return Response({"message": "El correo proporcionado no está registrado."}, status=status.HTTP_400_BAD_REQUEST)
 
             recovery_code = get_random_string(length=6, allowed_chars='0123456789')
-            cache.set(f'recovery_code_{user.id}', recovery_code, timeout=600)
+            cache.set(f'recovery_code_{user.id}', recovery_code, timeout=3200)
 
             subject = "Recuperación de contraseña"
             html_message = f"""
@@ -373,7 +373,29 @@ class RequestPasswordResetView(generics.GenericAPIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+class ValidateRecoveryCodeView(generics.GenericAPIView):
+    serializer_class = VerifyTokenSerializer
+    permission_classes = [AllowAny]
 
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            recovery_code = serializer.validated_data['recovery_code']
+
+            user = CustomUser.objects.filter(email=email).first()
+            if not user:
+                return Response({"message": "El correo proporcionado no está registrado."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Verificar el código de recuperación
+            stored_code = cache.get(f'recovery_code_{user.id}')
+            if not stored_code or stored_code != recovery_code:
+                return Response({"message": "Código de recuperación inválido o expirado."}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({"message": "Código de recuperación válido."}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 class PasswordResetConfirmView(generics.GenericAPIView):
     serializer_class = PasswordResetConfirmSerializer
     permission_classes = [AllowAny]
@@ -385,9 +407,8 @@ class PasswordResetConfirmView(generics.GenericAPIView):
             recovery_code = serializer.validated_data['recovery_code']
             new_password = serializer.validated_data['new_password']
 
-            try:
-                user = CustomUser.objects.get(email=email)
-            except User.DoesNotExist:
+            user = CustomUser.objects.filter(email=email).first()
+            if not user:
                 return Response({"message": "El correo proporcionado no está registrado."}, status=status.HTTP_400_BAD_REQUEST)
 
             # Verificar el código de recuperación
@@ -402,7 +423,7 @@ class PasswordResetConfirmView(generics.GenericAPIView):
             # Eliminar el código de recuperación del caché
             cache.delete(f'recovery_code_{user.id}')
 
-            return Response({"message": "Contraseña actualizada con éxito."}, status=status.HTTP_200_OK)
+            return Response({"message": "Contraseña restablecida exitosamente."}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

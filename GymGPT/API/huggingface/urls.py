@@ -18,5 +18,7 @@ urlpatterns = [
     # RESET PASSWORD
 
     path('request_password_recovery/', views.RequestPasswordResetView.as_view(), name='Request_Recovery'),
+    path('verify_code/', views.ValidateRecoveryCodeView.as_view(), name='Validate_Code'),
+
     path('reset_password/', views.PasswordResetConfirmView.as_view(), name='Reset_password'),
 ]

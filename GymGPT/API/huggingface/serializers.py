@@ -114,6 +114,24 @@ class RequestPasswordResetSerializer(serializers.Serializer):
         if not CustomUser.objects.filter(email=value).exists():
             raise serializers.ValidationError("No existe un usuario registrado con este correo electrónico.")
         return value
+
+class VerifyTokenSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    recovery_code = serializers.CharField(max_length=6)
+    def validate_email(self, value):
+        """
+        Verifica si el correo electrónico está registrado.
+        """
+        if not CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("No existe un usuario registrado con este correo electrónico.")
+        return value
+    def validate_recovery_code(self, value):
+        """
+        Verifica que el código de recuperación tenga 6 caracteres y que solo contenga dígitos.
+        """
+        if len(value) != 6 or not value.isdigit():
+            raise serializers.ValidationError("El código de recuperación debe tener 6 dígitos.")
+        return value
     
 class PasswordResetConfirmSerializer(serializers.Serializer):
     email = serializers.EmailField()
