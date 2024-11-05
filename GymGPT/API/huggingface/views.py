@@ -363,7 +363,7 @@ class RequestPasswordResetView(generics.GenericAPIView):
                 <p>Estimado {user.first_name},</p>
                 <p>Has solicitado recuperar tu contraseña. Utiliza el siguiente código para restablecerla:</p>
                 <h2 style="color: #28a745;">{recovery_code}</h2>
-                <p>Este código es válido por {timeout_min} minutos. Si no solicitaste este correo, ignóralo.</p>
+                <p>Este código es válido por {timeout_minutes} minutos. Si no solicitaste este correo, ignóralo.</p>
 
             </div>
             """
