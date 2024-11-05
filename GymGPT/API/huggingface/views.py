@@ -425,7 +425,33 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 
             # Eliminar el código de recuperación del caché
             cache.delete(f'recovery_code_{user.id}')
+            
+            # Enviar mensaje informando el cambio en la cuenta:
+            try:
+                user = CustomUser.objects.get(email=email)
+            except CustomUser.DoesNotExist:
+                return Response({"message": "El correo proporcionado no está registrado."}, status=status.HTTP_400_BAD_REQUEST)
 
+
+            subject = "Contraseña modificada"
+            html_message = f"""
+            <div style="font-family: Arial, sans-serif; color: #333;">
+                <h3 style="color: #007BFF;">Modificación de Contraseña</h3>
+                <p>Estimado {user.first_name},</p>
+                <p>Te enviamos este correo para confirmar que tu contraseña ha sido modificada exitosamente.</p>
+                <p>Si realizaste este cambio, puedes ignorar este mensaje. Sin embargo, si no solicitaste esta modificación, te recomendamos tomar acción de inmediato.</p>
+                <p>Por favor, responde a este correo o envía un mensaje a 
+                <a href="mailto:fabian.palma.ramos@gmail.com">soporte@GymGPT.com</a> para recibir asistencia y proteger la seguridad de tu cuenta.</p>
+                <p>Atentamente,</p>
+                <p>El equipo de soporte</p>
+            </div>
+            """
+            from_email = settings.EMAIL_HOST_USER
+            recipient_list = [user.email]
+            try:
+                send_mail(subject, "", from_email, recipient_list, html_message=html_message)
+            except Exception as ex:
+                print("Error enviando el correo:", ex)
             return Response({"message": "Contraseña restablecida exitosamente."}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
