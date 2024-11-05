@@ -350,6 +350,7 @@ class RequestPasswordResetView(generics.GenericAPIView):
                 return Response({"message": "El correo proporcionado no está registrado."}, status=status.HTTP_400_BAD_REQUEST)
 
             recovery_code = get_random_string(length=6, allowed_chars='0123456789')
+
             timeout_seconds = 1200
             cache.set(f'recovery_code_{user.id}', recovery_code, timeout=timeout_seconds)
             
@@ -362,7 +363,8 @@ class RequestPasswordResetView(generics.GenericAPIView):
                 <p>Estimado {user.first_name},</p>
                 <p>Has solicitado recuperar tu contraseña. Utiliza el siguiente código para restablecerla:</p>
                 <h2 style="color: #28a745;">{recovery_code}</h2>
-                <p>Este código es válido por {timeout_minutes} minutos. Si no solicitaste este correo, ignóralo.</p>
+                <p>Este código es válido por {timeout_min} minutos. Si no solicitaste este correo, ignóralo.</p>
+
             </div>
             """
             from_email = settings.EMAIL_HOST_USER
