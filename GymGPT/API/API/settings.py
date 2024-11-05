@@ -58,6 +58,8 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8100",  # Tu aplicación Ionic
     "http://127.0.0.1:8100",
+    "https://fabianpalma000.pythonanywhere.com",
+    "https://localhost",
 ]
 
 CORS_ALLOW_METHODS = [
