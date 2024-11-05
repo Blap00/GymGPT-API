@@ -352,9 +352,9 @@ class RequestPasswordResetView(generics.GenericAPIView):
             recovery_code = get_random_string(length=6, allowed_chars='0123456789')
 
             timeout_seconds = 1200
-            cache.set(f'recovery_code_{user.id}', recovery_code, timeout=timeout_seconds)
+            cache.set(f'recovery_code_{user.id}', recovery_code, timeout=1200)
             
-            timeout_minutes = timeout_seconds // 60
+            timeout_minutes = 1200 // 60
 
             subject = "Recuperación de contraseña"
             html_message = f"""
