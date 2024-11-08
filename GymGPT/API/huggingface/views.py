@@ -44,41 +44,56 @@ def interpret_MachineInfo(request):
         # Obtener los datos de la solicitud
         data = request.data
         machine_input = data.get('machine_type', '').strip()
+        difficult = data.get('difficult', '').strip()
 
         if not machine_input:
             return Response({'error': 'No se proporcionó el tipo de máquina'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Mapeo de dificultad
+        def get_difficulty_string(difficult):
+            difficult_map = {
+                "0": "Fácil",
+                "1": "Medio",
+                "2": "Difícil"
+            }
+            return difficult_map.get(difficult, "Desconocido")  # "Desconocido" si el valor no coincide con las claves
+
+        # Convertir la dificultad
+        difficult_string = get_difficulty_string(difficult)
 
         # Obtener la configuración desde la base de datos
         config = OpenAIConfig.objects.filter(use='Give machine INFO').first()
         if not config:
             return Response({'error': 'No se ha configurado la API de OpenAI'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         # Llamada a la API de OpenAI con los valores de la configuración
         response = openai.ChatCompletion.create(
             model=config.model,
             messages=[
                 {"role": "system", "content": config.system_message},
-                {"role": "user", "content": f'Describe la máquina {machine_input} y sus características.'}
+                {"role": "user", "content": f'Describe la máquina {machine_input} y sus características. Nivel de dificultad: {difficult_string}.'}
             ],
             max_tokens=config.max_tokens,
             temperature=config.temperature
         )
-        tipo_maquina = openai.ChatCompletion.create(
+        tipo_maquina_response = openai.ChatCompletion.create(
             model=config.model,
             messages=[
                 {"role": "system", "content": config.system_message},
-                {"role": "user", "content": f"Que tipo de maquina es {machine_input}"}
+                {"role": "user", "content": f"¿Qué tipo de máquina es {machine_input}?"}
             ],
             max_tokens=config.max_tokens,
             temperature=config.temperature
         )
+
         # Extraer la respuesta generada
         generated_text = response['choices'][0]['message']['content'].strip()
-        tipo_maquina = tipo_maquina['choices'][0]['message']['content'].strip()
+        tipo_maquina = tipo_maquina_response['choices'][0]['message']['content'].strip()
 
         # Almacenar la rutina generada en la base de datos
         user = request.user  # Obtener el usuario autenticado
         machine = MachineInfoGeneratedAI(
-            usuario=user,  # Aquí user será la instancia correcta de CustomUser si está autenticado
+            usuario=user,
             nom_maquina=machine_input,
             tipo_maquina=tipo_maquina,
             AI_use=config,
