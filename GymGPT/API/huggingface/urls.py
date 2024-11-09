@@ -6,6 +6,9 @@ urlpatterns = [
     path('routine/loadinfo', views.interpret_Routine, name='get_huggingface_routineInfo'),
     path('camera/scannedInfo', views.interpret_MachineInfo, name='get_huggingface_scannedInfo'),
 
+    # SEE INFO GENERATED
+    path('camera/infoBy/',views.getMachineInfo, name='Get_Info_byUser'),
+
     # AUTH PAGE
     path('register/', views.register_user, name='register_user'),
     path('login/', views.LoginView, name='Login_user'),
