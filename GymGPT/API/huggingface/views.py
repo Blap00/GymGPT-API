@@ -89,8 +89,8 @@ def interpret_MachineInfo(request):
         # Extraer la respuesta generada
         generated_text = response['choices'][0]['message']['content'].strip()
         tipo_maquina = tipo_maquina_response['choices'][0]['message']['content'].strip()
-        processed_text = generated_text.replace("\n\n", "<br /><br />").replace("\n", "<br />")
-        processed_MachineTyoe = tipo_maquina.replace("\n\n", "<br />").replace("\n", "")
+        processed_text = generated_text.replace("\n\n", "<br />").replace("\n", "<br />")
+        processed_MachineTyoe = tipo_maquina.replace("\n\n", "<br />").replace("\n", "<br />")
         # Almacenar la rutina generada en la base de datos
         user = request.user  # Obtener el usuario autenticado
         machine = MachineInfoGeneratedAI(
@@ -152,13 +152,14 @@ def interpret_Routine(request):
 
         # Extraer la respuesta generada por OpenAI
         generated_text = response['choices'][0]['message']['content'].strip()
-
+        processed_text = generated_text.replace("\n\n", "<br />").replace("\n", "<br />")
         # Almacenar la rutina generada en la base de datos
         user = request.user  # Obtener el usuario autenticado
         routine = RoutineGeneratedAI(
             usuario=user,  # Aquí user será la instancia correcta de CustomUser si está autenticado
             AI_use=config,
-            routineGenerated=generated_text
+            objective=text_input,
+            routineGenerated=processed_text
         )
         routine.save()
 
@@ -167,6 +168,34 @@ def interpret_Routine(request):
 
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def getRoutineInfo(request):
+    try:
+        user = request.user  # Obtener el usuario autenticado
+        objetivo = request.data.get('objetivo')  # Obtener el nombre del objetivo desde la solicitud, si se proporciona
+        
+        # Filtrar las rutinas del usuario y ordenar por fecha de creación
+        if objetivo:
+            # Si se proporciona un objetivo, buscar por usuario y objetivo, ordenando por fecha descendente
+            routine_info = RoutineGeneratedAI.objects.filter(usuario=user, objetivo=objetivo).order_by('-created_at').first()
+        else:
+            # Si no se proporciona un objetivo, buscar solo por usuario y la fecha más reciente
+            routine_info = RoutineGeneratedAI.objects.filter(usuario=user).order_by('-created_at').first()
+
+        # Validar si se encontró alguna rutina
+        if routine_info:
+            return Response({
+                'Routine': routine_info.routineGenerated.capitalize(),
+                'created_at': routine_info.created_at,
+                'message': 'Routine Info GET LAST BY USER AND OBJECTIVE' if objetivo else 'Routine Info GET LAST BY USER'
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'No se encontró información de rutina para el usuario y/o objetivo'}, status=status.HTTP_404_NOT_FOUND)
+    
+    except Exception as ex:
+        return Response({'error': str(ex)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])

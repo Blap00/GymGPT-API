@@ -43,6 +43,7 @@ class RoutineGeneratedAI(models.Model):
     usuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null= False, default=None )
     AI_use = models.ForeignKey(OpenAIConfig, on_delete=models.CASCADE, null= False, default=None)
     routineGenerated = models.TextField()
+    objective = models.CharField(max_length=50, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
