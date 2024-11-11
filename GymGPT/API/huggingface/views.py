@@ -525,3 +525,71 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# Get a list of Routines to send to FRONT 'searched from WEB'
+@api_view(['GET'])
+def getRoutinesGlobal(request):
+    try:
+        routineBucket = [
+            {'name': 'Rutina de Piernas Básica'},
+            {'name': 'Rutina de Piernas Avanzada'},
+            {'name': 'Rutina de Glúteos'},
+            {'name': 'Rutina de Glúteos y Piernas'},
+            {'name': 'Rutina de Cardio Completo'},
+            {'name': 'Rutina de Cardio para Principiantes'},
+            {'name': 'Rutina de Cardio HIIT'},
+            {'name': 'Rutina de Abdomen'},
+            {'name': 'Rutina de Core y Abdomen'},
+            {'name': 'Rutina de Abdomen Inferior'},
+            {'name': 'Rutina de Brazos'},
+            {'name': 'Rutina de Bíceps'},
+            {'name': 'Rutina de Tríceps'},
+            {'name': 'Rutina de Pecho'},
+            {'name': 'Rutina de Espalda'},
+            {'name': 'Rutina de Hombros'},
+            {'name': 'Rutina de Espalda y Bíceps'},
+            {'name': 'Rutina de Pecho y Tríceps'},
+            {'name': 'Rutina de Pecho Avanzada'},
+            {'name': 'Rutina de Piernas y Core'},
+            {'name': 'Rutina de Glúteos y Abdomen'},
+            {'name': 'Rutina de Cardio Intensivo'},
+            {'name': 'Rutina de Yoga Básica'},
+            {'name': 'Rutina de Yoga Avanzada'},
+            {'name': 'Rutina de Flexibilidad'},
+            {'name': 'Rutina de Resistencia General'},
+            {'name': 'Rutina de Equilibrio y Coordinación'},
+            {'name': 'Rutina Funcional para Todo el Cuerpo'},
+            {'name': 'Rutina de Movilidad'},
+            {'name': 'Rutina de Agilidad'},
+            {'name': 'Rutina de Fuerza y Potencia'},
+            {'name': 'Rutina de Calistenia para Principiantes'},
+            {'name': 'Rutina de Calistenia Avanzada'},
+            {'name': 'Rutina de Fuerza para Todo el Cuerpo'},
+            {'name': 'Rutina de Entrenamiento de Alta Intensidad'},
+            {'name': 'Rutina de Entrenamiento de Bajo Impacto'},
+            {'name': 'Rutina de Kickboxing'},
+            {'name': 'Rutina de Entrenamiento Funcional'},
+            {'name': 'Rutina de Cardio y Core'},
+            {'name': 'Rutina de Glúteos Intensiva'},
+            {'name': 'Rutina de Piernas y Cardio'},
+            {'name': 'Rutina de Cardio para Quemar Grasa'},
+            {'name': 'Rutina de Alta Resistencia'},
+            {'name': 'Rutina de Entrenamiento con Pesas'},
+            {'name': 'Rutina de Circuito Completo'},
+            {'name': 'Rutina de Descanso Activo'},
+            {'name': 'Rutina de Calentamiento'},
+            {'name': 'Rutina de Enfriamiento'},
+            {'name': 'Rutina de Relajación Muscular'}
+        ]
+        return Response({'routines':routineBucket}, status=status.HTTP_200_OK)
+    except Exception as ex:
+        return Response({'error': str(ex)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getLastRoutineUser(request, id):
+    try:
+        routines = RoutineGeneratedAI.objects.filter(usuario=id).order_by('-id').first()
+        routine = routines.objective
+        return Response({'routine': routine}, status=status.HTTP_200_OK)
+    except Exception as ex:
+        return Response({'error': str(ex)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
