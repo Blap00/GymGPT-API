@@ -652,6 +652,7 @@ def getRoutineInfoAll(request, id):
                 'Rutina': routine_info.objective.capitalize(),
                 'Ejercicio':routine_info.principalExerciseGen.capitalize(),
                 'Duracion': routine_info.horarioExcerciseGen,
+                'GeneratedRoutine': routine_info.routineGenerated,
                 'NomUsuario': user.first_name.capitalize()
             }, status=status.HTTP_200_OK)
         else:
