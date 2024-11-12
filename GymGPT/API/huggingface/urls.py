@@ -19,7 +19,8 @@ urlpatterns = [
     path('camera/infoBy/<int:id>',views.getMachineInfo, name='Get_MachineInfo_byUser'),
     path('routine/infoBy/<int:id>/',views.getRoutineInfo, name='Get_RoutineInfo_byUser'),
     path('routine/nameBy/<int:id>', views.getLastRoutineUser, name='Get_last_routine_USER'),
-
+    path('routine/infoBy/<int:id>/all',views.getRoutineInfoAll, name='Get_RoutineInfo_byUserAll'),
+    
     # RESET PASSWORD
     path('request_password_recovery/', views.RequestPasswordResetView.as_view(), name='Request_Recovery'),
     path('verify_code/', views.ValidateRecoveryCodeView.as_view(), name='Validate_Code'),
