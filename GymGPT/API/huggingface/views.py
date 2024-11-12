@@ -157,16 +157,53 @@ def interpret_Routine(request):
             max_tokens=config.max_tokens,
             temperature=config.temperature
         )
-
         # Extraer la respuesta generada por OpenAI
         generated_text = response['choices'][0]['message']['content'].strip()
         processed_text = generated_text.replace("\n\n", "<br />").replace("\n", "<br />")
+
+        configExcersice =  OpenAIConfig.objects.filter(use='Give by Hours excersice INFO').first()
+        if not configExcersice:
+            return Response({'error': 'No se ha configurado la API de OpenAI de configExcersice'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        excercise = openai.ChatCompletion.create(
+            model=configExcersice.model,
+            messages=[
+                {"role": "system", "content": configExcersice.system_message},
+                {"role": "user", "content": text_input}
+            ],
+            max_tokens=configExcersice.max_tokens,
+            temperature=configExcersice.temperature
+        )
+
+        
+        # Obtener la informacion en formato de horas:
+        text_principalExcersice = excercise['choices'][0]['message']['content'].strip()
+
+
+        configHoras = OpenAIConfig.objects.filter(use='Give by Hours INFO').first()
+        if not configHoras:
+            return Response({'error': 'No se ha configurado la API de OpenAI de ConfigHoras'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Llamada a la API de OpenAI con los valores de la configuración
+        horas = openai.ChatCompletion.create(
+            model=configHoras.model,
+            messages=[
+                {"role": "system", "content": configHoras.system_message},
+                {"role": "user", "content": f'{text_input}, {text_principalExcersice}'}
+            ],
+            max_tokens=configHoras.max_tokens,
+            temperature=configHoras.temperature
+        )
+        generated_text = horas['choices'][0]['message']['content'].strip()
         # Almacenar la rutina generada en la base de datos
         user = request.user  # Obtener el usuario autenticado
         routine = RoutineGeneratedAI(
             usuario=user,  # Aquí user será la instancia correcta de CustomUser si está autenticado
             AI_use=config,
             objective=text_input,
+            # Necesito obtener HORAS TOTALES
+            principalExerciseGen = text_principalExcersice,
+            # Necesito obtener Ejercio principal a realizar
+            horarioExcerciseGen = generated_text,
             routineGenerated=processed_text
         )
         routine.save()
@@ -525,3 +562,100 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# Get a list of Routines to send to FRONT 'searched from WEB'
+@api_view(['GET'])
+def getRoutinesGlobal(request):
+    try:
+        routineBucket = [
+            {'name': 'Rutina de Piernas Básica'},
+            {'name': 'Rutina de Piernas Avanzada'},
+            {'name': 'Rutina de Glúteos'},
+            {'name': 'Rutina de Glúteos y Piernas'},
+            {'name': 'Rutina de Cardio Completo'},
+            {'name': 'Rutina de Cardio para Principiantes'},
+            {'name': 'Rutina de Cardio HIIT'},
+            {'name': 'Rutina de Abdomen'},
+            {'name': 'Rutina de Core y Abdomen'},
+            {'name': 'Rutina de Abdomen Inferior'},
+            {'name': 'Rutina de Brazos'},
+            {'name': 'Rutina de Bíceps'},
+            {'name': 'Rutina de Tríceps'},
+            {'name': 'Rutina de Pecho'},
+            {'name': 'Rutina de Espalda'},
+            {'name': 'Rutina de Hombros'},
+            {'name': 'Rutina de Espalda y Bíceps'},
+            {'name': 'Rutina de Pecho y Tríceps'},
+            {'name': 'Rutina de Pecho Avanzada'},
+            {'name': 'Rutina de Piernas y Core'},
+            {'name': 'Rutina de Glúteos y Abdomen'},
+            {'name': 'Rutina de Cardio Intensivo'},
+            {'name': 'Rutina de Yoga Básica'},
+            {'name': 'Rutina de Yoga Avanzada'},
+            {'name': 'Rutina de Flexibilidad'},
+            {'name': 'Rutina de Resistencia General'},
+            {'name': 'Rutina de Equilibrio y Coordinación'},
+            {'name': 'Rutina Funcional para Todo el Cuerpo'},
+            {'name': 'Rutina de Movilidad'},
+            {'name': 'Rutina de Agilidad'},
+            {'name': 'Rutina de Fuerza y Potencia'},
+            {'name': 'Rutina de Calistenia para Principiantes'},
+            {'name': 'Rutina de Calistenia Avanzada'},
+            {'name': 'Rutina de Fuerza para Todo el Cuerpo'},
+            {'name': 'Rutina de Entrenamiento de Alta Intensidad'},
+            {'name': 'Rutina de Entrenamiento de Bajo Impacto'},
+            {'name': 'Rutina de Kickboxing'},
+            {'name': 'Rutina de Entrenamiento Funcional'},
+            {'name': 'Rutina de Cardio y Core'},
+            {'name': 'Rutina de Glúteos Intensiva'},
+            {'name': 'Rutina de Piernas y Cardio'},
+            {'name': 'Rutina de Cardio para Quemar Grasa'},
+            {'name': 'Rutina de Alta Resistencia'},
+            {'name': 'Rutina de Entrenamiento con Pesas'},
+            {'name': 'Rutina de Circuito Completo'},
+            {'name': 'Rutina de Descanso Activo'},
+            {'name': 'Rutina de Calentamiento'},
+            {'name': 'Rutina de Enfriamiento'},
+            {'name': 'Rutina de Relajación Muscular'}
+        ]
+        return Response({'routines':routineBucket}, status=status.HTTP_200_OK)
+    except Exception as ex:
+        return Response({'error': str(ex)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getLastRoutineUser(request, id):
+    try:
+        routines = RoutineGeneratedAI.objects.filter(usuario=id).order_by('-id').first()
+        routine = routines.objective
+        return Response({'routine': routine}, status=status.HTTP_200_OK)
+    except Exception as ex:
+        return Response({'error': str(ex)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getRoutineInfoAll(request, id):
+    try:
+        user = CustomUser.objects.filter(id=id).first()  # Obtener el usuario autenticado
+        objetivo = request.data.get('objetivo')  # Obtener el nombre del objetivo desde la solicitud, si se proporciona
+        
+        # Filtrar las rutinas del usuario y ordenar por fecha de creación
+        if objetivo:
+            # Si se proporciona un objetivo, buscar por usuario y objetivo, ordenando por fecha descendente
+            routine_info = RoutineGeneratedAI.objects.filter(usuario=user, objetivo=objetivo).order_by('-created_at').first()
+
+        else:
+            # Si no se proporciona un objetivo, buscar solo por usuario y la fecha más reciente
+            routine_info = RoutineGeneratedAI.objects.filter(usuario=user).order_by('-created_at').first()
+        # Validar si se encontró alguna rutina
+        if routine_info:
+            return Response({
+                'Rutina': routine_info.objective.capitalize(),
+                'Ejercicio':routine_info.principalExerciseGen.capitalize(),
+                'Duracion': routine_info.horarioExcerciseGen,
+                'NomUsuario': user.first_name.capitalize()
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'No se encontró información de rutina para el usuario y/o objetivo'}, status=status.HTTP_404_NOT_FOUND)
+    
+    except Exception as ex:
+        return Response({'error': str(ex)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
