@@ -60,6 +60,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8100",
     "https://fabianpalma000.pythonanywhere.com",
     "https://localhost",
+    "https://gym-gpt-front.vercel.app"
 ]
 
 CORS_ALLOW_METHODS = [
