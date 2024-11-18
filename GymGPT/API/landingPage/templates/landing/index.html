@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}GymGPT{% endblock %}
+{% block content %}
+{% load static %}
+<link type="text/css" rel="stylesheet" href='{% static "css/index.css" %}'>
+
+<!-- Name of page & indications -->
+<div class="container-fluid">
+    <!-- Carrusel de Fondo -->
+    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+        <!-- Indicadores -->
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"
+                aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"
+                aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"
+                aria-label="Slide 3"></button>
+        </div>
+
+        <!-- Contenedor de Imágenes -->
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="{% static 'img/imagen1.jpg' %}" class="d-block w-100" alt="Imagen 1">
+            </div>
+            <div class="carousel-item">
+                <img src="{% static 'img/imagen2.jpg' %}" class="d-block w-100" alt="Imagen 2">
+            </div>
+            <div class="carousel-item">
+                <img src="{% static 'img/imagen3.jpg' %}" class="d-block w-100" alt="Imagen 3">
+            </div>
+        </div>
+
+        <!-- Controles de Navegación -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
+            data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"
+            data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+        </button>
+    </div>
+
+    <!-- Título Centrado -->
+    <div class="row justify-content-center text-center GeneralTitle">
+        <h1 class="position-absolute top-50 start-50 translate-middle text-white">GymGPT</h1>
+    </div>
+
+    <!-- Row 1: Left-aligned, vertically centered -->
+    <div class="row justify-content-start align-items-center">
+        <div class="col-md-6">
+            <h3 class="Paragraph1 title1">¿Qué es GymGPT?</h3>
+            <p class="Paragraph1">
+                <span>GymGPT</span> es una solución móvil que busca dar una rápida y eficaz respuesta <br />
+                ante un problema común y frecuente en los gimnasios, las instrucciones e instructores. <br />
+                Claro, normalmente podemos observar las instrucciones a un costado, pero, <br />
+                ¿Qué sucede cuando queremos conseguir otra rutina? <br />
+            </p>
+        </div>
+    </div>
+
+    <!-- Row 2: Right-aligned, vertically centered -->
+    <div class="row justify-content-end align-items-center">
+        <div class="col-md-6 text-end">
+            <h3 class="Paragraph2 title2">¿Cuál es el objetivo de GymGPT?</h3>
+            <p class="Paragraph2">
+                El objetivo de nuestra solución con <span>GymGPT</span> es guiar al usuario <br />
+                con distintas rutinas de ejercicio, distintas formas de usar la maquinaria y llevar una vida más
+                saludable<br />
+                esto con la clara ayuda de la tecnología actual, los celulares. <br />
+                La aplicación de GymGPT te permitirá escanear distintas maquinarias, para recibir una respuesta
+                personalizada <br />
+                sobre el correcto uso de esta, permitiendo así, un entrenamiento acorde a tus necesidades<br />
+            </p>
+        </div>
+    </div>
+
+    <!-- Row 3: Left-aligned, vertically centered -->
+    <div class="row justify-content-start align-items-center">
+        <div class="col-md-6">
+            <h3 class="Paragraph3 title3">¿Dónde puedo obtener GymGPT?</h3>
+            <p class="Paragraph3">
+                Actualmente <span>GymGPT</span> se encuentra en desarrollo, aún así, a la brevedad<br />
+                se encontrará en las distintas tiendas de aplicaciones como Play Store y App Store. <br>
+                Puedes observar los siguientes códigos QR para acceder a su tienda: <br>
+                <br>
+                <!-- Contenedor Flexbox -->
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="me-3">Dispositivo Móviles</span>
+                <img src="{% static 'img/QrCode.svg' %}" alt="Logo Imagen QR" style="height: 25dvh;">
+            </div>
+            </p>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
