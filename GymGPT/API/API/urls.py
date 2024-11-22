@@ -21,6 +21,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    # Landing Site
+    path('', include('landingPage.urls')),
     path('admin/', admin.site.urls),
     path('api/v-1/', include('huggingface.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
