@@ -10,6 +10,7 @@ class CustomUser(AbstractUser):
     age = models.IntegerField(null=True)
     gender = models.CharField(max_length=10, null=True)
     image = models.ImageField(null=True)
+    subscription = models.BooleanField(default=False)
     def __str__(self):
         return str(self.id)
 # Feedback info
