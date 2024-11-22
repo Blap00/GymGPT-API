@@ -428,7 +428,8 @@ def get_user(request, id):
             'age': user.age,
             'weight': user.weight,
             'routines': routines_data,
-            'image': imagefieldResponse
+            'image': imagefieldResponse,
+            'subscription': user.subscription
         }
 
         return JsonResponse({"user": user_data}, status=status.HTTP_200_OK)
