@@ -159,7 +159,7 @@ def interpret_Routine(request):
         )
         # Extraer la respuesta generada por OpenAI
         generated_text = response['choices'][0]['message']['content'].strip()
-        processed_text = generated_text.replace("\n\n", "<br />").replace("\n", "<br />")
+        processed_text = generated_text.replace("\n\n", "<br />").replace("\n", "<br />").replace("```","").replace("html","")
 
         configExcersice =  OpenAIConfig.objects.filter(use='Give by Hours excersice INFO').first()
         if not configExcersice:
