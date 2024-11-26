@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     # OPENAI URLS
-    path('routine/loadinfo', views.interpret_Routine, name='get_huggingface_routineInfo'),
+    path('routine/loadinfo/', views.interpret_Routine, name='get_huggingface_routineInfo'),
     path('camera/scannedInfo', views.interpret_MachineInfo, name='get_huggingface_scannedInfo'),
 
     # AUTH PAGE
