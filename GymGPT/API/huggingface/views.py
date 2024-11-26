@@ -89,8 +89,8 @@ def interpret_MachineInfo(request):
         # Extraer la respuesta generada
         generated_text = response['choices'][0]['message']['content'].strip()
         tipo_maquina = tipo_maquina_response['choices'][0]['message']['content'].strip()
-        processed_text = generated_text.replace("\n\n", "<br />").replace("\n", "<br />").replace("```", "").replace("html","")
-        processed_MachineTyoe = tipo_maquina.replace("\n\n", "<br />").replace("\n", "<br />").replace("```", "").replace("html","")
+        processed_text = generated_text.replace("\n\n", "").replace("\n", "").replace("```", "").replace("html","").replace('< lang="es">', "")
+        processed_MachineTyoe = tipo_maquina.replace("\n\n", "").replace("\n", "").replace("```", "").replace("html","").replace('< lang="es">', "")
         # Almacenar la rutina generada en la base de datos
         user = request.user  # Obtener el usuario autenticado
         machine = MachineInfoGeneratedAI(
