@@ -456,10 +456,10 @@ class RequestPasswordResetView(generics.GenericAPIView):
 
             recovery_code = get_random_string(length=6, allowed_chars='0123456789')
 
-            timeout_seconds = 1200
-            cache.set(f'recovery_code_{user.id}', recovery_code, timeout=1200)
-            
-            timeout_minutes = 1200 // 60
+
+            cache.set(f'recovery_code_{user.id}', recovery_code)
+            stored_code = cache.get(f'recovery_code_{user.id}')
+
 
             subject = "Recuperación de contraseña"
             html_message = f"""
@@ -468,7 +468,7 @@ class RequestPasswordResetView(generics.GenericAPIView):
                 <p>Estimado {user.first_name},</p>
                 <p>Has solicitado recuperar tu contraseña. Utiliza el siguiente código para restablecerla:</p>
                 <h2 style="color: #28a745;">{recovery_code}</h2>
-                <p>Este código es válido por {timeout_minutes} minutos. Si no solicitaste este correo, ignóralo.</p>
+                <p>Este código es válido por 5 minutos. Si no solicitaste este correo, ignóralo.</p>
 
             </div>
             """
@@ -496,9 +496,12 @@ class ValidateRecoveryCodeView(generics.GenericAPIView):
             user = CustomUser.objects.filter(email=email).first()
             if not user:
                 return Response({"message": "El correo proporcionado no está registrado."}, status=status.HTTP_400_BAD_REQUEST)
+                
 
             # Verificar el código de recuperación
             stored_code = cache.get(f'recovery_code_{user.id}')
+            print("Stored_CODE: "+str(stored_code))
+            print("recovery_code: "+str(recovery_code))
             if not stored_code or stored_code != recovery_code:
                 return Response({"message": "Código de recuperación inválido o expirado."}, status=status.HTTP_400_BAD_REQUEST)
 
