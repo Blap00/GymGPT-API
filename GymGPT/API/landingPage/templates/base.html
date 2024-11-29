@@ -5,10 +5,27 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Language" content="es">
-    <meta name="description" content="Descubre GymGPT, tu solución para mejorar tu rutina de ejercicios en gimnasios. Aprende a usar máquinas de ejercicio y consigue rutinas personalizadas.">
-    <meta name="keywords" content="Aplicacion GymGPT, Maquinas GymGPT, Ejercicios GPT, GPTMachines, GPT routines, GPT System, aplicación GPT, ">
+    <meta name="author" content="GymGPT">
+
+    <!--SEO HTML -->
+    <meta name="description" content="GymGPT te ayuda a mejorar tus entrenamientos en el gimnasio con rutinas personalizadas y tutoriales para máquinas de ejercicio. ¡Optimiza tu salud hoy!">
+    <meta name="keywords" content="GymGPT, gimnasio inteligente, rutinas de gimnasio, tutoriales de máquinas, aplicación de ejercicios, salud y fitness, GPT para gimnasio, inteligencia artificial para fitness">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="google-site-verification" content="cO8flxF5nqsGlxX7KdsuNayobMIHcHMBe7mSiLtEnvo" />
+    <meta name="msvalidate.01" content="B0B57236AA578F2EC03D08D48A6F39BE" />
     <title>{% block title %}GymGPT{% endblock %}</title>
+    <!-- SEO OPEN GRAPH -->
+    <meta property="og:title" content="GymGPT - Tu Asistente Inteligente en el Gimnasio">
+    <meta property="og:description" content="Mejora tus entrenamientos con GymGPT. Aprende a usar máquinas, recibe rutinas personalizadas y optimiza tu salud. ¡Pruébalo ahora!">
+    <meta property="og:image" content="https://gymgpt.cl/images/og-image.jpg">
+    <meta property="og:url" content="https://gymgpt.cl">
+    <meta property="og:type" content="website">
+    <!-- Twitter Cards-->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="GymGPT - Tu Asistente Inteligente en el Gimnasio">
+    <meta name="twitter:description" content="Rutinas personalizadas y tutoriales para usar máquinas de gimnasio. Optimiza tu salud con GymGPT.">
+    <meta name="twitter:image" content="https://tusitio.com/images/twitter-image.jpg">
+
     <!-- Bootstrap CSS -->
     <link href='{% static "css/bootstrap.css" %}' rel="stylesheet">
     <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
@@ -85,7 +102,7 @@
             <li class="nav-item"><a href="{% url 'index' %}"" class="nav-link px-2 text-muted">Inicio</a></li>
             <li class="nav-item"><a href="{% url 'about' %}"" class="nav-link px-2 text-muted">Sobre Nosotros</a></li>
             <li class="nav-item"><a href="{% url 'price' %}"" class="nav-link px-2 text-muted">Precios</a></li>
-            <li class="nav-item"><a href="{% url 'termsCondition' %}"" class="nav-link px-2 text-muted">Terminos y Condiciones</a></li>            
+            <li class="nav-item"><a href="{% url 'termsCondition' %}"" class="nav-link px-2 text-muted">Terminos y Condiciones</a></li>
           </ul>
           <p class="text-center text-muted">© 2024 GymGPT</p>
         </footer>
