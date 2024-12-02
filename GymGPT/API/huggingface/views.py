@@ -27,9 +27,6 @@ from .serializers import *
 load_dotenv()
 User = get_user_model()
 
-# # Página de inicio
-# def index(request):
-#     return render(request, 'api/index.html')
 
 # Configurar la API Key de OpenAI
 openai.api_key = os.environ.get('OPENAI_API_KEY')
@@ -265,11 +262,9 @@ def register_user(request):
                     combinación de tecnologías modernas y buenas prácticas de desarrollo garantiza una experiencia fluida y confiable 
                     para el usuario final.
                 </p>
-                <h5>Para ingresar a nuestro repositorio temporal hasta llegar a producción, favor ingresar a 
-                    <a href="https://github.com/Blap00/GymGPT-API" style="color: #28a745;">este enlace</a>.
+                <h5>Para ingresar a nuestro sitio desde Vercel hasta cubrir todos los dispositivos, favor ingresar a 
+                    <a href="https://gym-gpt-front.vercel.app/home" style="color: #28a745;">este enlace</a>.
                 </h5>
-                <h6 style="color: #dc3545;">Si has recibido este enlace por error o te han llegado múltiples notificaciones no deseadas,
-                    por favor ignora este mensaje o bloquea al remitente. Gracias.</h6>
             </div>
             """
 
@@ -359,15 +354,14 @@ class UserEditarMultiParser(APIView):
                     <p>
                         Hemos recibido una modificación de usuario desde tu cuenta, si esto ha sido una equivocación o
                         similar, favor revisar su cuenta de GymGPT de no tener acceso a la cuenta solicitamos que nos envie
-                        un mail a <a href="mailto://test1ngm4il001@gmail.com">Correo de atención al usuario</a> informando
+                        un mail a <a href="mailto://fabian.palma.ramos@gmail.com">Correo de atención al usuario</a> informando
                         su situación y nosotros haremos lo posible por recuperar su cuenta, si olvido la contraseña de
                         ingreso, favor de ingresar '¿Olvido la contraseña?' en la Aplicación.
                     </p>
-                    <h5>Para ingresar a nuestro repositorio temporal hasta llegar a producción, favor ingresar a
-                        <a href="https://github.com/Blap00/GymGPT-API" style="color: #28a745;">este enlace</a>.
+                    <h5>Para ingresar a nuestro sitio desde Vercel hasta cubrir todos los dispositivos, favor ingresar a 
+                        <a href="https://gym-gpt-front.vercel.app/home" style="color: #28a745;">este enlace</a>.
                     </h5>
-                    <h6 style="color: #dc3545;">Si has recibido este enlace por error o te han llegado múltiples notificaciones no deseadas,
-                        por favor ignora este mensaje o bloquea al remitente. Gracias.</h6>
+
                 </div>
                 """
 
