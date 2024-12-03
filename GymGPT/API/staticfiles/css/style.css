@@ -1,0 +1,243 @@
+.navbar {
+    background-color: #000;
+}
+
+
+.imglogo {
+    /* width: 100%; */
+    height: 58px;
+    flex-shrink: 0;
+}
+
+
+/* Estilo para los enlaces con clase nav-link-custom */
+.btns {
+    text-decoration: none;
+    display: flex;
+    width: 160px;
+    padding: 10px 10px;
+    border: 2px solid #000;
+    background-color: #000;
+    margin-top: 50px;
+    margin-right: 120px;
+    margin-left: 120px;
+    cursor: pointer;
+    border-radius: 4px;
+    outline: none;
+    transition: all 400ms;
+    margin-bottom: 50px;
+}
+
+/* Cambio de color al pasar el cursor sobre los enlaces */
+.btns:hover {
+    background: #fff;
+    color: #000;
+}
+
+/* Cambiar el fondo al pasar el cursor */
+.btnsheader {
+    text-decoration: none;
+    display: flex;
+    /* Elimina el ancho fijo, ya que Bootstrap manejará el diseño responsivo */
+    /* width: 170px; */
+    color: #fff;
+    height: 100%;
+    padding: 10px 10px;
+    border: 2px solid #000;
+    background-color: #000;
+    cursor: pointer;
+    border-radius: 4px;
+    outline: none;
+    transition: all 400ms;
+}
+
+.btnsheader:hover {
+    background: #fff;
+    color: #000;
+}
+.btnsheader:focus {
+    background-color: #fff;
+    color: #000;
+}
+/* Mantener ancho fijo y flotante solo en pantallas grandes (md y superiores) */
+@media (min-width: 768px) {
+    .btnsheader {
+        width: 170px;
+        float: right;
+    }
+}
+
+
+/* Cambiar el fondo al pasar el cursor */
+
+.tipografia {
+    color: #ffff;
+    font-family: Inter;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    /* Centrar verticalmente */
+    justify-content: center;
+    /* Centrar horizontalmente */
+}
+
+.tipografiatitle {
+    color: #000;
+    font-family: Inter;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    /* Centrar verticalmente */
+    justify-content: left;
+    /* Centrar horizontalmente */
+}
+
+.tipografiatitle1 {
+    color: #fff;
+    font-family: Inter;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    /* Centrar verticalmente */
+    justify-content: left;
+    /* Centrar horizontalmente */
+}
+
+
+/*estilo form*/
+.form-inline {
+    background-color: transparent;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    width: 600px;
+    height: 160px;
+    flex-flow: row !important;
+}
+
+/*Estilo boton ver horario*/
+.btnshorario {
+    text-decoration: none;
+    display: flex;
+    width: 160px;
+    padding: 10px 10px;
+    border: 2px solid #000;
+    background-color: #000;
+    cursor: pointer;
+    outline: none;
+    transition: all 400ms;
+    margin-top: 25px;
+    margin-bottom: 15px;
+
+
+}
+
+.btnshorario1 {
+    text-decoration: none;
+    display: flex;
+    width: 160px;
+    padding: 10px 10px;
+    border: 2px solid #039700;
+    background-color: #039700;
+    cursor: pointer;
+    outline: none;
+    transition: all 400ms;
+    margin-top: 25px;
+    margin-bottom: 15px;
+
+
+}
+
+.btnshorario1:hover {
+    background-color: #fff;
+    color: #000;
+    border: 2px solid #000;
+}
+
+/* Cambio de color al pasar el cursor sobre los enlaces */
+.btnshorario:hover {
+    background-color: #fff;
+    color: #000;
+    border: 2px solid #000;
+}
+
+/* Cambiar el fondo al pasar el cursor */
+
+
+/*.card {
+    background-color: transparent;
+    border: 1px solid #000;
+    border-radius: 10px;
+    box-shadow: 10px 10px 10px 3px rgba(1, 0, 0, 0.5);
+    margin-top: 150px;
+}
+
+.headercard {
+    padding: .75rem 1.25rem;
+    margin-bottom: 0;
+    background-color: #000;
+    border-bottom: 1px solid rgba(0, 0, 0, .125);
+}*/
+
+.navbar-toggler {
+    border: 2px solid white !important;
+    margin: 10px;
+}
+
+span.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='white' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+#id_fecinievento,
+#id_fecfinevento {
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 100%;
+    background-color: #f9f9f9;
+    color: #333;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: border-color 0.3s;
+}
+
+#id_fecinievento:hover,
+#id_fecfinevento:hover {
+    border-color: #007BFF;
+}
+
+#id_fecinievento::before,
+#id_fecfinevento::before {
+    content: "\f073";
+    font-family: FontAwesome;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#id_fecinievento::before,
+#id_fecfinevento::before {
+    color: #555;
+    font-size: 18px;
+    pointer-events: none;
+}
+
+.principalmp {
+    margin-top: 30px;
+    /*width: 70%;*/
+    /* Esto hará que el div ocupe la mitad del ancho disponible */
+    /*float: left;*/
+    /* Esto hará que el div se alinee a la izquierda */
+}
