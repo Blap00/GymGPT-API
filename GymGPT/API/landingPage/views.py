@@ -10,3 +10,9 @@ def TermsAndCondition(request):
     return render(request=request,
                   template_name='landing/termsCondition.html',
                   context={})
+
+def aboutUs(request):
+    return render(request=request,
+                  template_name='landing/aboutus.html',
+                  context={})
+

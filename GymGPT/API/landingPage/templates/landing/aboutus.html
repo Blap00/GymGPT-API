@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}GymGPT{% endblock %}
+{% block content %}
+{% load static %}
+<link type="text/css" rel="stylesheet" href='{% static "css/index.css" %}'>
+
+<!-- Name of page & indications -->
+<div class="container-fluid">
+    <!-- Título Centrado -->
+    <div class="row justify-content-center text-center GeneralTitle">
+        <h1 class="position-absolute top-50 start-50 translate-middle text-white">GymGPT</h1>
+    </div>
+
+    <!-- Row 1: Quienes Somos -->
+    <div class="row align-items-center my-5">
+        <div class="col-md-6">
+            <h3 class="Paragraph1 title1">¿Quienes Somos?</h3>
+            <p class="Paragraph1">
+                Nosotros somos estudiantes de DuocUC, nuestros nombres son Angelo Gonzalez y Fabian Palma
+                estudiamos Ingenieria Informatica, ademas de apasionarnos por desarrollar aplicaciones
+                tambien nos centramos en el desarrollo de habilidades como QA, Documentacion y más! <br> <br>
+                Nuestras plataformas donde encontraras nuestros portafolios son:
+            </p>
+            <div class="row align-items-center">
+                <div class="col-6">
+                    <h6>Angelo Gonzalez</h6>
+                </div>
+                <div class="col-6">
+                    <img src="{% static 'img/QrGit2.png' %}" alt="Qr Github Angelo" class="img-fluid" style="height: 25dvh; width: 12dvw;">
+                </div>
+            </div>
+            <div class="row align-items-center">
+                <div class="col-6">
+                    <h6>Fabián Palma</h6>
+                </div>
+                <div class="col-6">
+                    <img src="{% static 'img/QrGit1.png' %}" alt="Qr Github Fabian" class="img-fluid" style="height: 25dvh; width: 12dvw;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección Objetivo del Proyecto -->
+        <div class="col-md-6">
+            <h3 class="Paragraph2 title2">¿Cuál es el objetivo del Proyecto?</h3>
+            <p class="Paragraph2">
+                Nuestro objetivo durante este proyecto es simple: ayudar, guiar, entrenar y simplificar los procesos en Gimnasios. 
+                La tareá de ayer respecto a consultar especificamente por rutinas y como conseguir trabajar con una maquina especial, 
+                ya no sera necesario, ya que nuestro proyecto simplificará la vida de cada persona en los gimnasios.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
