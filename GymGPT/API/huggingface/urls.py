@@ -10,6 +10,11 @@ urlpatterns = [
     path('register/', views.register_user, name='register_user'),
     path('login/', views.LoginView, name='Login_user'),
 
+    #   # GENERATE VERIFICATION
+    path('register/code/gen/', views.SendVerificationCodeView.as_view(), name="sendverificationEmail"),
+    #   # Verify Code
+    path('register/code/ver/', views.ValidateMailAndCodeView.as_view(), name="verifycodeMail" ),
+
     #MODIFY MODELS
     path('edit-profile/', views.UserEditarMultiParser.as_view(), name='edit-profile'),
     path('feedback/create/', views.FeedbackCreateView.as_view(), name='feedback-create'),

@@ -162,3 +162,41 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         if len(value) < 8:
             raise serializers.ValidationError("La nueva contraseña debe tener al menos 8 caracteres.")
         return value
+    
+class VerifyMailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        """
+        Verifica si el correo electrónico proporcionado está asociado a un usuario registrado.
+        """
+        if CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Ya existe un usuario registrado con este correo electrónico.")
+        return value
+    
+class ValidateMailAndCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    validation_code = serializers.CharField(max_length=6)
+
+    def validate(self, data):
+        """
+        Validar el código y el correo.
+        """
+        email = data.get("email")
+        validation_code = data.get("validation_code")
+
+        try:
+            # Buscar el código en la base de datos
+            code_entry = VerificationCode.objects.get(email=email)
+        except VerificationCode.DoesNotExist:
+            raise serializers.ValidationError({"email": "El correo no tiene un código asociado."})
+
+        # Verificar si el código coincide
+        if code_entry.code != validation_code:
+            raise serializers.ValidationError({"validation_code": "El código de verificación es incorrecto."})
+
+        # Verificar si el código no ha expirado
+        if not code_entry.is_valid():
+            raise serializers.ValidationError({"validation_code": "El código ha expirado."})
+
+        return data 

@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils.timezone import now
+from datetime import timedelta
+
 
 # Create your models here.
 
@@ -75,3 +78,14 @@ class Ejercicios(models.Model):
     usuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     def __str__(self):
         return f"Ejercicio {self.grupo_muscular} para {self.usuario} con {self.repeticiones} repeticiones"
+
+
+# GENERADOR DE TOKEN para Confirmar DATOS
+class VerificationCode(models.Model):
+    email = models.EmailField(unique=True)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_valid(self):
+        # Código válido por 10 minutos
+        return now() < self.created_at + timedelta(minutes=10)

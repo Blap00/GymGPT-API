@@ -10,6 +10,8 @@ from django.utils.crypto import get_random_string
 import openai  # type: ignore
 from dotenv import load_dotenv
 import os
+import uuid
+
 
 from rest_framework import status, exceptions  # type: ignore
 from rest_framework.response import Response  # type: ignore
@@ -197,9 +199,7 @@ def interpret_Routine(request):
             usuario=user,  # Aquí user será la instancia correcta de CustomUser si está autenticado
             AI_use=config,
             objective=text_input,
-            # Necesito obtener HORAS TOTALES
             principalExerciseGen = text_principalExcersice,
-            # Necesito obtener Ejercio principal a realizar
             horarioExcerciseGen = generated_text,
             routineGenerated=processed_text
         )
@@ -218,12 +218,9 @@ def getRoutineInfo(request, id):
         user = CustomUser.objects.filter(id=id).first()  # Obtener el usuario autenticado
         objetivo = request.data.get('objetivo')  # Obtener el nombre del objetivo desde la solicitud, si se proporciona
         
-        # Filtrar las rutinas del usuario y ordenar por fecha de creación
         if objetivo:
-            # Si se proporciona un objetivo, buscar por usuario y objetivo, ordenando por fecha descendente
             routine_info = RoutineGeneratedAI.objects.filter(usuario=user, objetivo=objetivo).order_by('-created_at').first()
         else:
-            # Si no se proporciona un objetivo, buscar solo por usuario y la fecha más reciente
             routine_info = RoutineGeneratedAI.objects.filter(usuario=user).order_by('-created_at').first()
 
         # Validar si se encontró alguna rutina
@@ -658,3 +655,50 @@ def getRoutineInfoAll(request, id):
     
     except Exception as ex:
         return Response({'error': str(ex)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Validación CODE
+class ValidateMailAndCodeView(APIView):
+    def post(self, request):
+        serializer = ValidateMailAndCodeSerializer(data=request.data)
+        if serializer.is_valid():
+            return Response({"message": "El correo y el código son válidos."}, status=status.HTTP_200_OK)
+        return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+# Envio de MAIL
+class SendVerificationCodeView(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+
+        if not email:
+            return Response({"message": "El correo es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Verificar si el correo ya está registrado
+        if CustomUser.objects.filter(email=email).exists():
+            return Response({"message": "El correo ya está registrado."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Generar código único
+        code = get_random_string(length=4, allowed_chars='0123456789')
+
+        # Guardar código en la base de datos
+        VerificationCode.objects.update_or_create(email=email, defaults={"code": code})
+        print("LOL?")
+        # Enviar correo con el código
+        subject = "Código de verificación"
+        html_message = f"""
+            <div style="font-family: Arial, sans-serif; color: #333;">
+                <h3 style="color: #007BFF;">Código de validación</h3>
+                <p>Estimado,</p>
+                <p>Para registrar su usuario en nuestro sistema necesita utilizar el siguiente código:</p>
+                <h2 style="color: #28a745;">{code}</h2>
+                <p>Este código es válido por 5 minutos. Si no solicitaste este correo, ignóralo.</p>
+
+            </div>
+            """
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = [email]
+        try:
+            send_mail(subject, "", from_email, recipient_list, html_message=html_message)
+            return Response({"message": "El código de verificación ha sido enviado a tu correo."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"message": "Error al enviar el correo.", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
