@@ -88,4 +88,4 @@ class VerificationCode(models.Model):
 
     def is_valid(self):
         # Código válido por 10 minutos
-        return now() < self.created_at + timedelta(minutes=10)
+        return now() < self.created_at + timedelta(minutes=25)

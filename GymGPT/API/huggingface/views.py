@@ -20,6 +20,13 @@ from rest_framework.permissions import IsAuthenticated, AllowAny  # type: ignore
 from rest_framework.views import APIView  # type: ignore
 from rest_framework import generics, permissions  # type: ignore
 
+# JWT
+from rest_framework_simplejwt.tokens import RefreshToken
+
+
+# GOOGLE AUTH
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 # Importar modelos y serializers
 from .models import *  # Importando modelos desde models.py
@@ -33,6 +40,12 @@ User = get_user_model()
 # Configurar la API Key de OpenAI
 openai.api_key = os.environ.get('OPENAI_API_KEY')
 User = get_user_model()
+
+# Configura la API de firebase para verificar con GOOGLE
+import firebase_admin
+from firebase_admin import credentials, auth
+
+# Inicializa Firebase (haz esto una sola vez en tu proyecto)
 
 
 # IT WILL GIVE MACHINE INFO, CONFIGURED INSIDE THE MODELS
@@ -302,6 +315,66 @@ def LoginView(request):
         else:
             print("Serializer errors: ", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from firebase_admin import auth
+import json
+# Cargar la configuración desde la variable de entorno
+firebase_config = os.environ.get("FIREBASE_CONFIG")
+if not firebase_config:
+    raise ValueError("La configuración de Firebase no está definida en las variables de entorno.")
+
+# Convertir la configuración de JSON a un diccionario
+firebase_config_dict = json.loads(firebase_config)
+
+# Inicializar Firebase
+cred = credentials.Certificate(firebase_config_dict)
+
+firebase_admin.initialize_app(cred)
+@api_view(['POST'])
+def LoginGoogleAuth(request):
+    try:
+        # Obtén el token enviado desde el frontend
+        google_token = request.data.get('token', None)
+        if not google_token:
+            return Response({"error": "Token no proporcionado."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Verificar el token con Firebase
+        decoded_token = auth.verify_id_token(google_token)
+        firebase_user = decoded_token.get('email')
+        if not firebase_user:
+            return Response({"error": "No se pudo obtener el email del token."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+        # Obtener o crear el usuario en la base de datos4
+        user, created = CustomUser.objects.get_or_create(
+            email=firebase_user,
+            defaults={
+                'username': firebase_user.split('@')[0],
+                'first_name': decoded_token.get('name', ''),
+                'last_name': decoded_token.get('family_name', ''),
+            }
+        )
+
+        # Genera el token JWT
+        refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
+        # Serializar y devolver los datos del usuario
+        serializer = CustomUserSerializer(user)
+        return Response({
+            "message": "Inicio de sesión exitoso.",
+            "user": serializer.data,
+            "accessTokens": str(access_token),
+            'refreshTokens': str(refresh), 
+        }, status=status.HTTP_200_OK)
+
+    except auth.InvalidIdTokenError:
+        return Response({"error": "Token inválido."}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(f"Error: {e}")
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UserEditView(generics.UpdateAPIView):
@@ -447,9 +520,8 @@ class RequestPasswordResetView(generics.GenericAPIView):
 
             recovery_code = get_random_string(length=6, allowed_chars='0123456789')
 
-
-            cache.set(f'recovery_code_{user.id}', recovery_code)
-            stored_code = cache.get(f'recovery_code_{user.id}')
+            VerificationCode.objects.update_or_create(email=email, defaults={"code": recovery_code})
+            stored_code = VerificationCode.objects.get(email=email,  code =recovery_code)
 
 
             subject = "Recuperación de contraseña"
@@ -458,7 +530,7 @@ class RequestPasswordResetView(generics.GenericAPIView):
                 <h3 style="color: #007BFF;">Código de Recuperación</h3>
                 <p>Estimado {user.first_name},</p>
                 <p>Has solicitado recuperar tu contraseña. Utiliza el siguiente código para restablecerla:</p>
-                <h2 style="color: #28a745;">{recovery_code}</h2>
+                <h2 style="color: #28a745;">{str(stored_code)}</h2>
                 <p>Este código es válido por 5 minutos. Si no solicitaste este correo, ignóralo.</p>
 
             </div>
@@ -479,26 +551,10 @@ class ValidateRecoveryCodeView(generics.GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = ValidateMailAndCodeSerializer(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data['email']
-            recovery_code = serializer.validated_data['recovery_code']
-
-            user = CustomUser.objects.filter(email=email).first()
-            if not user:
-                return Response({"message": "El correo proporcionado no está registrado."}, status=status.HTTP_400_BAD_REQUEST)
-                
-
-            # Verificar el código de recuperación
-            stored_code = cache.get(f'recovery_code_{user.id}')
-            print("Stored_CODE: "+str(stored_code))
-            print("recovery_code: "+str(recovery_code))
-            if not stored_code or stored_code != recovery_code:
-                return Response({"message": "Código de recuperación inválido o expirado."}, status=status.HTTP_400_BAD_REQUEST)
-
-            return Response({"message": "Código de recuperación válido."}, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "El correo y el código son válidos."}, status=status.HTTP_200_OK)
+        return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
 class PasswordResetConfirmView(generics.GenericAPIView):
     serializer_class = PasswordResetConfirmSerializer
@@ -508,7 +564,7 @@ class PasswordResetConfirmView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']
-            recovery_code = serializer.validated_data['recovery_code']
+            recovery_code = serializer.validated_data['validation_code']
             new_password = serializer.validated_data['new_password']
 
             user = CustomUser.objects.filter(email=email).first()
@@ -516,7 +572,7 @@ class PasswordResetConfirmView(generics.GenericAPIView):
                 return Response({"message": "El correo proporcionado no está registrado."}, status=status.HTTP_400_BAD_REQUEST)
 
             # Verificar el código de recuperación
-            stored_code = cache.get(f'recovery_code_{user.id}')
+            stored_code = VerificationCode.objects.get(email=email, code=recovery_code)
             if not stored_code or stored_code != recovery_code:
                 return Response({"message": "Código de recuperación inválido o expirado."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -689,7 +745,7 @@ class SendVerificationCodeView(APIView):
                 <h3 style="color: #007BFF;">Código de validación</h3>
                 <p>Estimado,</p>
                 <p>Para registrar su usuario en nuestro sistema necesita utilizar el siguiente código:</p>
-                <h2 style="color: #28a745;">{code}</h2>
+                <h2 style="color: #28a745;">{str(code)}</h2>
                 <p>Este código es válido por 5 minutos. Si no solicitaste este correo, ignóralo.</p>
 
             </div>

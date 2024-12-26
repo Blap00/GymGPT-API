@@ -9,6 +9,7 @@ urlpatterns = [
     # AUTH PAGE
     path('register/', views.register_user, name='register_user'),
     path('login/', views.LoginView, name='Login_user'),
+    path('login/google/auth/', views.LoginGoogleAuth, name='Login_user_google'),
 
     #   # GENERATE VERIFICATION
     path('register/code/gen/', views.SendVerificationCodeView.as_view(), name="sendverificationEmail"),

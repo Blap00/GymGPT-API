@@ -58,6 +58,21 @@ class LoginSerializer(serializers.Serializer):
         attrs['user'] = user
         return attrs
 
+class CustomUserSerializer(serializers.ModelSerializer):
+    is_new_user = serializers.SerializerMethodField()
+    # "Field name `full_name` is not valid for model `CustomUser` in `huggingface.serializers.CustomUserSerializer`."
+
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'email', 'is_new_user']
+
+    def get_is_new_user(self, obj):
+        # Agrega lógica para determinar si el usuario es nuevo
+        return obj.date_joined == obj.last_login
+
+        
+
+
 class UserEditSerializer(serializers.ModelSerializer):
     current_password = serializers.CharField(write_only=True)
     image = serializers.ImageField(required=False)
@@ -184,6 +199,7 @@ class ValidateMailAndCodeSerializer(serializers.Serializer):
         """
         email = data.get("email")
         validation_code = data.get("validation_code")
+
 
         try:
             # Buscar el código en la base de datos
