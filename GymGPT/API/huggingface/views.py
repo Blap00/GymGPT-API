@@ -325,7 +325,7 @@ from google.auth.transport import requests
 from rest_framework_simplejwt.tokens import RefreshToken
 
 # Configura tu CLIENT_ID (ID del cliente de tu app en GCP)
-GOOGLE_CLIENT_ID = "552925030949-6qm9ju0094n2aog0potr3recncnm52sl.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = "552925030949-fr3rra4lje9enhf74b2diig9qddvrf2e.apps.googleusercontent.com"
 
 @api_view(['POST'])
 def LoginGoogleAuth(request):
