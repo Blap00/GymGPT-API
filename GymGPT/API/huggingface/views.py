@@ -319,20 +319,14 @@ def LoginView(request):
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from firebase_admin import auth
-import json
-# Cargar la configuración desde la variable de entorno
-firebase_config = os.environ.get("FIREBASE_CONFIG")
-if not firebase_config:
-    raise ValueError("La configuración de Firebase no está definida en las variables de entorno.")
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
-# Convertir la configuración de JSON a un diccionario
-firebase_config_dict = json.loads(firebase_config)
+from rest_framework_simplejwt.tokens import RefreshToken
 
-# Inicializar Firebase
-cred = credentials.Certificate(firebase_config_dict)
+# Configura tu CLIENT_ID (ID del cliente de tu app en GCP)
+GOOGLE_CLIENT_ID = "552925030949-fr3rra4lje9enhf74b2diig9qddvrf2e.apps.googleusercontent.com"
 
-firebase_admin.initialize_app(cred)
 @api_view(['POST'])
 def LoginGoogleAuth(request):
     try:
@@ -341,26 +335,32 @@ def LoginGoogleAuth(request):
         if not google_token:
             return Response({"error": "Token no proporcionado."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Verificar el token con Firebase
-        decoded_token = auth.verify_id_token(google_token)
-        firebase_user = decoded_token.get('email')
-        if not firebase_user:
-            return Response({"error": "No se pudo obtener el email del token."}, status=status.HTTP_400_BAD_REQUEST)
+        # Verifica el token de Google
+        id_info = id_token.verify_oauth2_token(google_token, requests.Request(), GOOGLE_CLIENT_ID)
 
+        # Asegúrate de que el token esté emitido por Google y sea válido para tu aplicación
+        if id_info['aud'] != GOOGLE_CLIENT_ID:
+            return Response({"error": "El token no coincide con el CLIENT_ID."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Obtener o crear el usuario en la base de datos4
+        # Extrae la información del usuario
+        email = id_info.get('email')
+        name = id_info.get('name', '')
+        first_name, last_name = name.split(' ', 1) if ' ' in name else (name, '')
+
+        # Busca o crea el usuario en la base de datos
         user, created = CustomUser.objects.get_or_create(
-            email=firebase_user,
+            email=email,
             defaults={
-                'username': firebase_user.split('@')[0],
-                'first_name': decoded_token.get('name', ''),
-                'last_name': decoded_token.get('family_name', ''),
+                'username': email.split('@')[0],
+                'first_name': first_name,
+                'last_name': last_name,
             }
         )
 
         # Genera el token JWT
         refresh = RefreshToken.for_user(user)
         access_token = refresh.access_token
+
         # Serializar y devolver los datos del usuario
         serializer = CustomUserSerializer(user)
         return Response({
@@ -370,8 +370,8 @@ def LoginGoogleAuth(request):
             'refreshTokens': str(refresh), 
         }, status=status.HTTP_200_OK)
 
-    except auth.InvalidIdTokenError:
-        return Response({"error": "Token inválido."}, status=status.HTTP_400_BAD_REQUEST)
+    except ValueError:
+        return Response({"error": "Token inválido o expirado."}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         print(f"Error: {e}")
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
