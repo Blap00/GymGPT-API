@@ -315,33 +315,37 @@ def LoginView(request):
         else:
             print("Serializer errors: ", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from google.oauth2 import id_token
-from google.auth.transport import requests
 
 from rest_framework_simplejwt.tokens import RefreshToken
+from google.auth.transport import requests
+import time
 
 # Configura tu CLIENT_ID (ID del cliente de tu app en GCP)
-GOOGLE_CLIENT_ID = "552925030949-6qm9ju0094n2aog0potr3recncnm52sl.apps.googleusercontent.com"
-
+GOOGLE_CLIENT_ID = "552925030949-fr3rra4lje9enhf74b2diig9qddvrf2e.apps.googleusercontent.com"
+ 
 @api_view(['POST'])
 def LoginGoogleAuth(request):
+    time.sleep(2)
     try:
         # Obtén el token enviado desde el frontend
         google_token = request.data.get('token', None)
         if not google_token:
             return Response({"error": "Token no proporcionado."}, status=status.HTTP_400_BAD_REQUEST)
-
         # Verifica el token de Google
-        id_info = id_token.verify_oauth2_token(google_token, requests.Request(), GOOGLE_CLIENT_ID)
+        print("Verifica el token de Google")
+        try:
+            print(GOOGLE_CLIENT_ID)
+            id_info = id_token.verify_oauth2_token(google_token, requests.Request(), 
+                                                   GOOGLE_CLIENT_ID)
+        except ValueError as e:
+            return Response({"error": "El Id_info no es valido. "+str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+        print(f" id info = {id_info}")
         # Asegúrate de que el token esté emitido por Google y sea válido para tu aplicación
+
         if id_info['aud'] != GOOGLE_CLIENT_ID:
             return Response({"error": "El token no coincide con el CLIENT_ID."}, status=status.HTTP_400_BAD_REQUEST)
-
+        print("IT GET HERE!")
         # Extrae la información del usuario
         email = id_info.get('email')
         name = id_info.get('name', '')
@@ -356,7 +360,7 @@ def LoginGoogleAuth(request):
                 'last_name': last_name,
             }
         )
-
+        print("IS DOING GREAT")
         # Genera el token JWT
         refresh = RefreshToken.for_user(user)
         access_token = refresh.access_token
